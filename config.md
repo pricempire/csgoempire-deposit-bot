@@ -1,4 +1,4 @@
-```json
+```js
 {
     "settings": {
         "logging": false, // if true, logs are saved to /logs folder.
