@@ -8,7 +8,7 @@ You can configure the bot as you want.
 
 - CSGOEmpire 2FA support.
 - Multi account support.
-- Autoconfirm the deposit.
+- Auto confirm the deposit.
 - Auto delist / dodge the trade if the item dropped in its price.
 - Auto send the offer via Steam.
 - Auto send the offer via [Browser Extension](https://csgotrader.app/).
