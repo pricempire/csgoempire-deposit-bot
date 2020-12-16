@@ -11,23 +11,15 @@ export class BotService {
 
     constructor(
         private csgoempireService = new CsgoempireService(),
-        private helperService = new HelperService(),
+        private helperService = new HelperService()
     ) {
         this.initPeer();
+        csgoempireService.pricempire = this.pricempire;
     }
+
     private initPeer() {
         this.pricempire = io(process.env.npm_lifecycle_event === 'start:dev' ? 'ws://localhost:5000/peer' : 'wss://bot.pricempire.com/peer', {
             transports: ['websocket']
-        });
-
-        this.pricempire.on('error', err => {
-            // console.log(err);
-        });
-        this.pricempire.on('connect_error', err => {
-            // console.log(err);
-        });
-        this.pricempire.on('connect_failed', err => {
-            // console.log(err);
         });
         this.pricempire.on('connect', () => {
             this.pricempire.emit('auth', this.config.settings.pricempire.authToken);

@@ -1,4 +1,4 @@
-export interface Datum {
+export interface Data3 {
     app_id: number;
     appid: number;
     asset_id: string;
@@ -27,7 +27,7 @@ export interface Datum {
 
 export interface InventoryResponse {
     success: boolean;
-    data: Datum[];
+    data: Data3[];
 }
 
 export interface Room {

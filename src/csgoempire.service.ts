@@ -15,6 +15,8 @@ export class CsgoempireService {
     private sockets = {};
     private offerSentFor = [];
     private config: Config = require('../config.json');
+    public pricempire;
+
     constructor(
     ) {
         this.helperService = new HelperService();
@@ -24,7 +26,20 @@ export class CsgoempireService {
             if (config.selflock) {
                 await this.selfLock(config.userId);
             }
+            await this.pricempirePeer(config.userId);
             await this.helperService.delay(5000);
+        });
+    }
+    private async pricempirePeer(userId) {
+        setInterval(async () => {
+            await this.pricempirePeer(userId);
+        }, 30 * 60 * 1000);
+        const inventory = await this.getUserInventory(userId);
+        inventory.data.forEach(item => {
+            this.pricempire.emit('price-commit', {
+                itemName: item.market_name,
+                price: item.market_value,
+            })
         });
     }
     private initSocket(userId) {
@@ -112,7 +127,7 @@ export class CsgoempireService {
                                 status.data.items.forEach(item => {
                                     assetIds.push(item.asset_id);
                                 });
-                                await this.helperService.sendMessage(`Opening tradelink for ${itemName} - ${itemPrice} coins`, 'tradeStatusSending'); 
+                                await this.helperService.sendMessage(`Opening tradelink for ${itemName} - ${itemPrice} coins`, 'tradeStatusSending');
                                 await open(`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`, { app: 'chrome' });
                             } else {
                                 await this.helperService.sendMessage(`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`, 'tradeStatusSending');
