@@ -13,7 +13,7 @@
             "pushoverToken": "aaaaaaaaaaaaaa"
         },
         "pricempire": {
-            "authToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" // Pricempire auth token.
+            "authToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" // Pricempire token from https://pricempire.com/docs-api (doesn't need sub to use this)
         },
         "csgoempire": [
             {
