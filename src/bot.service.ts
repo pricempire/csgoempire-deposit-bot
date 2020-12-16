@@ -18,7 +18,7 @@ export class BotService {
     }
 
     private initPeer() {
-        this.pricempire = io(process.env.npm_lifecycle_event === 'start:dev' ? 'ws://localhost:5000/peer' : 'wss://bot.pricempire.com/peer', {
+        this.pricempire = io(process.env.npm_lifecycle_event === 'start:dev' ? 'ws://localhost:5000/peer' : 'wss://socket.pricempire.com/peer', {
             transports: ['websocket']
         });
         this.pricempire.on('connect', () => {
