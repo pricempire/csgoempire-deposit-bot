@@ -14,7 +14,7 @@ You can configure the bot as you want.
 - Auto send the offer via [Browser Extension](https://csgotrader.app/).
 - Discord Notifications.
 - Pushover Notifications.
-- [SDA](https://github.com/Jessecar96/SteamDesktopAuthenticator) Price-Peer.
+- [Pricempire.com](https://pricempire.com/peer) Price-Peer.
 
 
 ## Installation
