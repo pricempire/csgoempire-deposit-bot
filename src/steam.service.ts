@@ -9,7 +9,7 @@ export class SteamService {
     private managers = {};
     private helperService: HelperService;
     private steam = new SteamCommunity();
-    private config: Config = require(process.env.npm_lifecycle_event === 'start:dev' ? '../config.json' : './config.json');
+    private config: Config = require('../config.json');
     constructor() {
         this.helperService = new HelperService();
         this.helperService.asyncForEach(this.config.settings.csgoempire, async (config: Csgoempire) => {

@@ -44,9 +44,9 @@ You have to put the correct cookies to the config.json
 ##### To send offers from your browser (mobile confirmation required), get the [CSGOTRADER.APP](https://csgotrader.app/) extension end enable "Send offers based on query params".
 ### If you remove your authenticator from your mobile, you will face 15 days tradeban.
 
-## Usage
+#### Config example [HERE](https://github.com/antal-k/antal-k-csgoempire-deposit/blob/main/config.md)
 
-
+ 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 

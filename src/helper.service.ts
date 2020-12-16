@@ -7,7 +7,7 @@ const Push = require('pushover-notifications');
 const dateFormat = require('dateformat');
 
 export class HelperService {
-    private config: Config = require(process.env.npm_lifecycle_event === 'start:dev' ? '../config.json' : './config.json');
+    private config: Config = require('../config.json');
     private log_file;
     private log_file_live;
     private pushoverClient;

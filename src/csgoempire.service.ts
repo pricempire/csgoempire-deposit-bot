@@ -14,7 +14,7 @@ export class CsgoempireService {
     private depositItems = {};
     private sockets = {};
     private offerSentFor = [];
-    private config: Config = require(process.env.npm_lifecycle_event === 'start:dev' ? '../config.json' : './config.json');
+    private config: Config = require('../config.json');
     constructor(
     ) {
         this.helperService = new HelperService();

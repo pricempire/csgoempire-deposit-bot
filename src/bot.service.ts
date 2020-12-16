@@ -7,7 +7,7 @@ const io = require('socket.io-client');
 
 export class BotService {
     private pricempire;
-    private config: Config = require(process.env.npm_lifecycle_event === 'start:dev' ? '../config.json' : './config.json');
+    private config: Config = require('../config.json');
 
     constructor(
         private csgoempireService = new CsgoempireService(),
