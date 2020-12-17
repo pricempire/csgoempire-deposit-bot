@@ -71,7 +71,7 @@ export class CsgoempireService {
                     signature: meta.socket_signature
                 });
                 this.sockets[`user_${userId}`].emit('p2p/new-items/subscribe', 1);
-                this.loadDepositItems(userId);
+                await this.loadDepositItems(userId);
             }
         });
         this.sockets[`user_${userId}`].on('init', (data) => {
