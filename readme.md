@@ -34,9 +34,11 @@ This script require 2 cookies (3 if you use 2FA) from your browser.
 - PHPSESSID
 - do_not_share_this_with_anyone_not_even_staff
 
+## 2FA and PIN only for Self-lock feature. You don't have to add it to config if you don't use that feature.
+
 Additionally for 2FA:
 - device_auth_[userId]
-    
+
 You have to put the correct cookies to the config.json
 
 #### For the steam config, you need [SDA](https://github.com/Jessecar96/SteamDesktopAuthenticator) to get the sharedSecret & identitySecret.
