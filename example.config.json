@@ -23,7 +23,8 @@
                 "do_not_share_this_with_anyone_not_even_staff": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                 "uuid": "aaaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa",
                 "device_auth": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                "selflock": true,
+                "selflock": false,
+                "csgotrader": false,
                 "origin": "csgoempire.com",
                 "delistThreshold": 5,
                 "steam": {

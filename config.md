@@ -26,6 +26,7 @@
                 "device_auth": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",// Your CSGOEmpire device_auth_[userid] cookie.
                 "selflock": true, // If you want to disable gambling in your account.
                 "origin": "csgoempire.com", // The site you using for trading.
+                "csgotrader": false, // set true if you using Gery's chrome extension, to autosend the offers
                 "delistThreshold": 5,// The percentage to delist the item if its drop in price.
                 "steam": {
                     "enabled": false, // Set true if you want to use auto send offer via steam.
