@@ -35,12 +35,14 @@ export class CsgoempireService {
             await this.pricempirePeer(userId);
         }, 30 * 60 * 1000);
         const inventory = await this.getUserInventory(userId);
-        inventory.data.forEach(item => {
-            this.pricempire.emit('price-commit', {
-                itemName: item.market_name,
-                price: item.market_value,
-            })
-        });
+        if(inventory) {
+            inventory.data.forEach(item => {
+                this.pricempire.emit('price-commit', {
+                    itemName: item.market_name,
+                    price: item.market_value,
+                })
+            });
+        }
     }
     private initSocket(userId) {
         const config = this.config.settings.csgoempire.find(config => config.userId === userId);
@@ -163,9 +165,11 @@ export class CsgoempireService {
         };
         try {
             const response = await get(options) as DepositResponse;
-            response.data.deposits.forEach(item => {
-                this.depositItems[`item_${item.id}`] = item.total_value;
-            });
+            if(response && response.data) {
+                response.data.deposits.forEach(item => {
+                    this.depositItems[`item_${item.id}`] = item.total_value;
+                });
+            }
             return true;
         } catch (e) {
             await this.helperService.sendMessage(`Bad response from ${config.origin} at 'loadDepositItems', ${e.message}`, 'badResponse');
@@ -237,6 +241,7 @@ export class CsgoempireService {
             return await get(options) as InventoryResponse;
         } catch (e) {
             await this.helperService.sendMessage(`Bad response from ${config.origin} at 'getUserInventory', ${e.message}`, 'badResponse');
+            return false;
         }
     }
     public async delistItem(userId, botId) {
