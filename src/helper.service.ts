@@ -90,8 +90,8 @@ export class HelperService {
         if(this.config.notifications[event]) {
             await this.sendDiscord(message);
             await this.sendPushover(message);
+            this.log(message, this.events[event].color);
         }
-        this.log(message, this.events[event].color);
     }
     private async sendPushover(msg) {
         if (this.config.settings.pushover.enabled) {
