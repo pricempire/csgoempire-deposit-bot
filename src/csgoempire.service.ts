@@ -24,7 +24,7 @@ export class CsgoempireService {
         this.helperService.asyncForEach(this.config.settings.csgoempire, async (config) => {
             this.initSocket(config.userId);
             if (config.selflock) {
-                await this.selfLock(config.userId);
+                await this.selfLock(config.userId, 24);
             }
             await this.pricempirePeer(config.userId);
             await this.helperService.delay(5000);
@@ -51,6 +51,7 @@ export class CsgoempireService {
                 path: "/socket.io/",
                 transports: ['websocket'],
                 secure: true,
+                forceNew: true,
                 rejectUnauthorized: false,
                 reconnect: true,
                 extraHeaders: {
@@ -284,7 +285,7 @@ export class CsgoempireService {
         }
     }
     public async selfLock(userId, period = 24) {
-        // adding next selflock event
+        // adding next selflock event, only support 24h period...
         setTimeout(async () => {
             await this.selfLock(userId, period);
         }, (period * 60 * 60 * 1000) + (60 * 1000));
@@ -295,7 +296,7 @@ export class CsgoempireService {
             url: `https://${config.origin}/api/v2/user/self-lock`,
             method: 'POST',
             json: {
-                period: period,
+                period,
                 security_token: securityToken
             },
             headers: {
