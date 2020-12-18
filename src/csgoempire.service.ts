@@ -31,7 +31,7 @@ export class CsgoempireService {
         });
     }
     private async pricempirePeer(userId) {
-        setInterval(async () => {
+        setTimeout(async () => {
             await this.pricempirePeer(userId);
         }, 30 * 60 * 1000);
         const inventory = await this.getUserInventory(userId);
