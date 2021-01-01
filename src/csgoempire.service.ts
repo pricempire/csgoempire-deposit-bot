@@ -49,7 +49,6 @@ export class CsgoempireService {
         this.sockets[`user_${userId}`] = io(`wss://trade.${config.origin}/`,
             {
                 path: "/socket.io/",
-                transports: ['websocket'],
                 secure: true,
                 forceNew: true,
                 rejectUnauthorized: false,
