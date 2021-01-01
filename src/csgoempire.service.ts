@@ -48,6 +48,7 @@ export class CsgoempireService {
         const config = this.config.settings.csgoempire.find(config => config.userId === userId);
         this.sockets[`user_${userId}`] = io(`wss://trade.${config.origin}/`,
             {
+                transports: ['websocket'],
                 path: "/socket.io/",
                 secure: true,
                 forceNew: true,
@@ -57,7 +58,7 @@ export class CsgoempireService {
                     'User-agent': config.userAgent,
                 },
             });
-        this.sockets[`user_${userId}`].on('error', err => {
+        this.sockets[`user_${userId}`].on('error', (err, v) => {
             console.log(`error: ${err}`);
         })
         this.sockets[`user_${userId}`].on("connect", async () => {
