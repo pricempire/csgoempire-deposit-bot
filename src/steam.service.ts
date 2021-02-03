@@ -36,6 +36,15 @@ export class SteamService {
             }
         });
     }
+    async send(offer) {
+        await offer.send((err, status) => {
+            if (err) {
+                setTimeout(async () => {
+                    await this.send(offer);
+                }, 10000); // Try to send the offer every 10 seconds, when there's no success
+            }
+        })
+    }
     async sendOffer(sendItems, tradeURL: string, userId: number) {
         const config = this.config.settings.csgoempire.find(config => config.userId === userId);
         const items = [];
@@ -48,7 +57,7 @@ export class SteamService {
         });
         const offer = this.managers[config.steam.accountName].createOffer(tradeURL);
         offer.addMyItems(items);
-        await offer.send();
+        await this.send(offer); 
         setTimeout(() => {
             this.steam.acceptConfirmationForObject(config.steam.identitySecret, offer.id, status => {
                 this.helperService.sendMessage(`Deposit item sent & confirmed`, 'steamOfferConfirmed');
