@@ -106,7 +106,7 @@ export class CsgoempireService {
             const itemPrice = status.data.items[0].market_value;
 
             const originalItemPrice = this.depositItems[`item_${status.data.id}`];
-            const percent = (originalItemPrice / itemPrice * 100) - 100;
+            const percent = (itemPrice - originalItemPrice) / originalItemPrice * 100 * -1; // We multiply the percentage change by -1 so we can compare it with the threshold set by the user
 
             if (!originalItemPrice || originalItemPrice >= itemPrice || percent <= config.delistThreshold) {
                 switch (status.data.status_text) {
