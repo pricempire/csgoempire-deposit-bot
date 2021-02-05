@@ -85,11 +85,14 @@ export class CsgoempireService {
             const item = JSON.parse(json) as P2PNewItem;
             const originalItemPrice = this.depositItems[`item_${item.id}`];
             if (originalItemPrice) {
-                const percent = (originalItemPrice / item.market_value * 100) - 100;
+                const percent =
+                    ((item.market_value - originalItemPrice) /
+                        originalItemPrice) *
+                    100;
                 const prefix = percent > 0 ? '-' : '+';
                 this.helperService.sendMessage(`Price changed for ${item.market_name}, ${item.market_value / 100} => ${originalItemPrice / 100} - ${prefix}${(percent < 0 ? percent * -1 : percent)}%`, 'p2pItemUpdatedPriceChanged');
                 if (percent > config.delistThreshold) {
-                    const status = await this.delistItem(config.userId, item.id);
+                    const status = await this.delistItem(config.userId, item.bot_id);
                     this.helperService.sendMessage(`${item.market_name} Delisted successfully`, 'p2pItemUpdatedDelist');
                 }
             }
