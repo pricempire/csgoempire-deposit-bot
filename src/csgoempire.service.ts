@@ -88,7 +88,7 @@ export class CsgoempireService {
                 const percent =
                     ((item.market_value - originalItemPrice) /
                         originalItemPrice) *
-                    100;
+                    100 * -1; // We multiply it by -1 to be able to compare it with the threshold set by the user
                 const prefix = percent > 0 ? '-' : '+';
                 this.helperService.sendMessage(`Price changed for ${item.market_name}, ${item.market_value / 100} => ${originalItemPrice / 100} - ${prefix}${(percent < 0 ? percent * -1 : percent)}%`, 'p2pItemUpdatedPriceChanged');
                 if (percent > config.delistThreshold) {
@@ -106,7 +106,7 @@ export class CsgoempireService {
             const itemPrice = status.data.items[0].market_value;
 
             const originalItemPrice = this.depositItems[`item_${status.data.id}`];
-            const percent = (originalItemPrice / itemPrice * 100) - 100;
+            const percent = (itemPrice - originalItemPrice) / originalItemPrice * 100 * -1; // We multiply the percentage change by -1 so we can compare it with the threshold set by the user
 
             if (!originalItemPrice || originalItemPrice >= itemPrice || percent <= config.delistThreshold) {
                 switch (status.data.status_text) {
