@@ -1,6 +1,6 @@
 import * as util from "util";
 import * as fs from "fs";
-import { post } from "request-promise";
+import axios from "axios";
 
 const Push = require("pushover-notifications");
 const dateFormat = require("dateformat");
@@ -137,13 +137,8 @@ export class HelperService {
   private async sendDiscord(message) {
     if (this.config.settings.discord.enabled) {
       try {
-        await post({
-          url: this.config.settings.discord.discordHook,
-          method: "POST",
-          json: true,
-          body: {
-            content: `<@${this.config.settings.discord.userId}> ${message}`,
-          },
+        await axios.post(this.config.settings.discord.discordHook, {
+          content: `<@${this.config.settings.discord.userId}> ${message}`,
         });
         return true;
       } catch (e) {
