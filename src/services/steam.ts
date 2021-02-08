@@ -1,4 +1,4 @@
-import { HelperService } from "./helper.service";
+import { HelperService } from "./helper";
 
 const SteamCommunity = require("steamcommunity");
 const TradeOfferManager = require("steam-tradeoffer-manager");

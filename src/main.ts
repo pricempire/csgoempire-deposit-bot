@@ -1,4 +1,4 @@
-import { BotService } from "./bot.service";
+import { BotService } from "./services/bot";
 
 async function bootstrap() {
     // start the bot

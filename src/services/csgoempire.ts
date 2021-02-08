@@ -1,6 +1,6 @@
 import { get, post } from 'request-promise';
-import { HelperService } from "./helper.service";
-import { SteamService } from "./steam.service";
+import { HelperService } from "./helper";
+import { SteamService } from "./steam";
 
 const io = require('socket.io-client');
 const open = require('open');

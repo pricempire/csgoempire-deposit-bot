@@ -1,5 +1,5 @@
-import { CsgoempireService } from "./csgoempire.service";
-import { HelperService } from "./helper.service";
+import { CsgoempireService } from "./csgoempire";
+import { HelperService } from "./helper";
 
 const io = require("socket.io-client");
 
