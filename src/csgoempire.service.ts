@@ -1,7 +1,4 @@
 import { get, post } from 'request-promise';
-import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript';
-import { Config } from './config.models';
-import { CancelResponse, DepositResponse, InventoryResponse, MetaResponse, P2PNewItem, SecurityTokenResponse, SelfLockResponse, TradeStatus } from './csgoempire.models';
 import { HelperService } from "./helper.service";
 import { SteamService } from "./steam.service";
 
