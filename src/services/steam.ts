@@ -49,6 +49,27 @@ export class SteamService {
 			}
 		);
 	}
+	async steamGuardConfirmation(offer, identitySecret) {
+		this.steam.acceptConfirmationForObject(
+			identitySecret,
+			offer.id,
+			(err: Error | null) => {
+				if (err) {
+					setTimeout(async () => {
+						await this.steamGuardConfirmation(
+							offer,
+							identitySecret
+						);
+					}, 5000); // Try to send the offer every 5 seconds, when there's no success
+				} else {
+					this.helperService.sendMessage(
+						`Deposit item sent & confirmed`,
+						"steamOfferConfirmed"
+					);
+				}
+			}
+		);
+	}
 	async send(offer) {
 		await offer.send((err, status) => {
 			if (err) {
@@ -75,18 +96,7 @@ export class SteamService {
 		);
 		offer.addMyItems(items);
 		await this.send(offer);
-		setTimeout(() => {
-			this.steam.acceptConfirmationForObject(
-				config.steam.identitySecret,
-				offer.id,
-				(status) => {
-					this.helperService.sendMessage(
-						`Deposit item sent & confirmed`,
-						"steamOfferConfirmed"
-					);
-				}
-			);
-		}, 3000);
+		await this.steamGuardConfirmation(offer, config.steam.identitySecret);
 	}
 	async login(config: Steam) {
 		return new Promise((resolve, reject) => {
