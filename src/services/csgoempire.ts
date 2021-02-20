@@ -263,7 +263,7 @@ export class CsgoempireService {
                     options
                 )
             ).data as DepositResponse;
-            if (response && response.data) {
+            if (response) {
                 response.data.deposits.forEach((item) => {
                     this.depositItems[`item_${item.id}`] = item.total_value;
                 });

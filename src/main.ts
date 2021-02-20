@@ -1,4 +1,3 @@
-import config from "./config.json";
 import { BotService } from "./services/bot";
 
 async function bootstrap() {
