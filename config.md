@@ -22,15 +22,11 @@
                 "securityCode": "0000", // Your CSGOEmpire security code.
                 "PHPSESSID": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",// Your CSGOEmpire PHPSESSID.
                 "do_not_share_this_with_anyone_not_even_staff": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",// Your CSGOEmpire do_not_share_this_with_anyone_not_even_staff.
-                "uuid": "aaaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa",// Your CSGOEmpire uuid
-                "device_auth": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",// Your CSGOEmpire device_auth_[userid] cookie.
-                "selflock": true, // If you want to disable gambling in your account.
                 "origin": "csgoempire.com", // The site you using for trading.
                 "csgotrader": false, // set true if you using Gery's chrome extension, to autosend the offers
                 "delistThreshold": 5,// The percentage to delist the item if its drop in price.
                 "steam": {
-                    "enabled": false, // Set true if you want to use auto send offer via steam.
-                    "accountName": "aaaaaaaaaaaaaa", // Your Steam username (not necessary)
+                    "accountName": false, // Your Steam username (not necessary), set false to disable steam
                     "password": "aaaaaaaaaaaaaa", // Your Steam password (not necessary)
                     "identitySecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa=", // Your Steam identitySecret (not necessary)
                     "sharedSecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa=" // Your Steam sharedSecret (not necessary)

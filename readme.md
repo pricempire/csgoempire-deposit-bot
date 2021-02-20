@@ -29,15 +29,10 @@ Install Node.js v12 from [here](https://nodejs.org/dist/v12.17.0/node-v12.17.0-x
 
 
 ## Cookies
-This script require 2 cookies (3 if you use 2FA) from your browser.
+This script require 2 cookies from your browser.
 
 - PHPSESSID
 - do_not_share_this_with_anyone_not_even_staff
-
-## 2FA and PIN only for Self-lock feature. You don't have to add it to config if you don't use that feature.
-
-Additionally for 2FA:
-- device_auth_[userId]
 
 You have to put the correct cookies to the config.json
 
@@ -50,7 +45,7 @@ You have to put the correct cookies to the config.json
 
  
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome. For major changes, please open an issue first to discuss what would you like to change.
 
 Please make sure to update tests as appropriate.
 

@@ -23,10 +23,6 @@ export class CsgoempireService {
             this.config.settings.csgoempire,
             async (config) => {
                 this.initSocket(config.userId);
-                console.log(await this.securityToken(config.userId));
-                if (config.selflock) {
-                    await this.selfLock(config.userId, 24);
-                }
                 await this.pricempirePeer(config.userId);
                 await this.helperService.delay(5000);
             }
@@ -67,7 +63,7 @@ export class CsgoempireService {
         return {
             headers: {
                 "user-agent": config.userAgent,
-                "x-empire-device-identifier": config.uuid,
+                // "x-empire-device-identifier": config.uuid,
                 cookie: cookieString.slice(0, -2),
             },
         };
@@ -278,39 +274,6 @@ export class CsgoempireService {
             return false;
         }
     }
-    public async securityToken(userId: number) {
-        const config = this.config.settings.csgoempire.find(
-            (config) => config.userId === userId
-        );
-        let data = {
-            code: config.securityCode,
-            uuid: config.uuid,
-        };
-        const options = await this.getRequestConfig(userId);
-        // if (config.securityCode === "0000") {
-        //   data["type"] = "standard";
-        //   data["remember_device"] = false;
-        // }
-        try {
-            const body = (
-                await axios.post(
-                    `https://${config.origin}/api/v2/user/security/token`,
-                    data,
-                    options
-                )
-            ).data as SecurityTokenResponse;
-            if (body.success) {
-                return body.token;
-            } else {
-                return false;
-            }
-        } catch (e) {
-            await this.helperService.sendMessage(
-                `Bad response from ${config.origin} at 'securityToken', ${e.message}`,
-                "badResponse"
-            );
-        }
-    }
     public async requestMetaModel(userId: number) {
         const config = this.config.settings.csgoempire.find(
             (config) => config.userId === userId
@@ -385,36 +348,6 @@ export class CsgoempireService {
         } catch (e) {
             await this.helperService.sendMessage(
                 `Bad response from ${config.origin} at 'confirmTrade', ${e.message}`,
-                "badResponse"
-            );
-        }
-    }
-    public async selfLock(userId, period = 24) {
-        // adding next selflock event, only support 24h period...
-        setTimeout(async () => {
-            await this.selfLock(userId, period);
-        }, period * 60 * 60 * 1000 + 60 * 1000);
-
-        const config = this.config.settings.csgoempire.find(
-            (config) => config.userId === userId
-        );
-        const securityToken = await this.securityToken(userId);
-        const data = {
-            period,
-            security_token: securityToken,
-        };
-        const options = await this.getRequestConfig(userId);
-        try {
-            return (
-                await axios.post(
-                    `https://${config.origin}/api/v2/user/self-lock`,
-                    data,
-                    options
-                )
-            ).data as SelfLockResponse;
-        } catch (e) {
-            await this.helperService.sendMessage(
-                `Bad response from ${config.origin} at 'selfLock', ${e.message}`,
                 "badResponse"
             );
         }
