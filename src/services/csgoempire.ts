@@ -13,7 +13,7 @@ export class CsgoempireService {
     private depositItems = {};
     private sockets = {};
     private offerSentFor = [];
-    private config: Config = require("../config.json");
+    private config: Config = require("../../config.json");
     public pricempire;
 
     constructor() {
@@ -262,8 +262,8 @@ export class CsgoempireService {
                     `https://${config.origin}/api/v2/trade/trades`,
                     options
                 )
-            ).data as DepositResponse;
-            if (response) {
+            ) as DepositResponse;
+            if (response && response.data) {
                 response.data.deposits.forEach((item) => {
                     this.depositItems[`item_${item.id}`] = item.total_value;
                 });

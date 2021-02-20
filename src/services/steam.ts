@@ -8,7 +8,7 @@ export class SteamService {
 	private managers = {};
 	private helperService: HelperService;
 	private steam = new SteamCommunity();
-	private config: Config = require("../config.json");
+	private config: Config = require("../../config.json");
 	constructor() {
 		this.helperService = new HelperService();
 		this.helperService.asyncForEach(

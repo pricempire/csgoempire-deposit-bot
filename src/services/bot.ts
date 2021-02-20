@@ -5,7 +5,7 @@ const io = require("socket.io-client");
 
 export class BotService {
 	private pricempire;
-	private config: Config = require("../config.json");
+	private config: Config = require("../../config.json");
 
 	constructor(
 		private csgoempireService = new CsgoempireService(),
