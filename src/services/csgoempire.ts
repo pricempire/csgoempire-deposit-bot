@@ -262,7 +262,7 @@ export class CsgoempireService {
                     `https://${config.origin}/api/v2/trade/trades`,
                     options
                 )
-            ) as DepositResponse;
+            ).data as DepositResponse;
             if (response && response.data) {
                 response.data.deposits.forEach((item) => {
                     this.depositItems[`item_${item.id}`] = item.total_value;
