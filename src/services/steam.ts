@@ -38,6 +38,23 @@ export class SteamService {
 								}
 							}
 						);
+
+						// Accepts all offers empty from our side
+						this.managers[config.steam.accountName].on(
+							"newOffer",
+							(offer) => {
+								console.log(offer.itemsToGive.length > 0);
+								console.log(!offer.isOurOffer);
+								if (
+									offer.itemsToGive.length > 0 &&
+									!offer.isOurOffer
+								) {
+									offer.decline();
+								} else {
+									offer.accept();
+								}
+							}
+						);
 					} catch (err) {
 						this.helperService.sendMessage(
 							`Steam login fail for ${config.steam.accountName}: ${err.message}`,
@@ -96,7 +113,7 @@ export class SteamService {
 		);
 		offer.addMyItems(items);
 		await this.send(offer);
-		
+
 		// Wait 10 seconds to prevent offer id being null and breaking Steam Guard Confirmation
 		setTimeout(async () => {
 			await this.steamGuardConfirmation(
