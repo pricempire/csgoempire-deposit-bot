@@ -54,6 +54,9 @@ export class HelperService {
 		tradeStatusProcessing: {
 			color: this.colors.FgGreen,
 		},
+		tradeStatusCanceled: {
+			color: this.colors.FgRed
+		},
 		steamOfferConfirmed: {
 			color: this.colors.FgGreen,
 		},

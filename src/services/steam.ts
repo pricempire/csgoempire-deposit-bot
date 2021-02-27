@@ -43,8 +43,6 @@ export class SteamService {
 						this.managers[config.steam.accountName].on(
 							"newOffer",
 							(offer) => {
-								console.log(offer.itemsToGive.length > 0);
-								console.log(!offer.isOurOffer);
 								if (
 									offer.itemsToGive.length > 0 &&
 									!offer.isOurOffer

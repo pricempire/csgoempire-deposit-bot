@@ -20,6 +20,8 @@ interface Csgoempire {
 	securityCode: string;
 	PHPSESSID: string;
 	do_not_share_this_with_anyone_not_even_staff: string;
+	uuid: string;
+	device_auth: string;
 	steam: Steam;
 	csgotrader: boolean;
 	origin: string;
