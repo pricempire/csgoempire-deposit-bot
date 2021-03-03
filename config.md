@@ -30,6 +30,7 @@
                     "password": "aaaaaaaaaaaaaa", // Your Steam password (not necessary)
                     "identitySecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa=", // Your Steam identitySecret (not necessary)
                     "sharedSecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa=" // Your Steam sharedSecret (not necessary)
+					"acceptOffers": true // Automatically accepts Steam Offers empty from out side
                 }
             }
         ]

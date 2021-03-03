@@ -1,50 +1,51 @@
 {
-    "settings": {
-        "logging": false,
-        "discord": {
-            "enabled": true,
-            "userId": "263780944031252482",
-            "discordHook": "https://discord.com/api/webhooks/788791748990206022/3ST-mjkiijagonagsnS214sdffasDFDSAfahgfdaH12412asdfdsfas2"
-        },
-        "pushover": {
-            "enabled": false,
-            "pushoverUser": "aaaaaaaaaaaaaa",
-            "pushoverToken": "aaaaaaaaaaaaaa"
-        },
-        "pricempire": {
-            "authToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        },
-        "csgoempire": [
-            {
-                "userId": 12345,
-                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
-                "securityCode": "0000",
-                "PHPSESSID": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                "do_not_share_this_with_anyone_not_even_staff": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                "csgotrader": false,
-                "origin": "csgoempire.com",
-                "delistThreshold": 5,
-                "steam": {
-                    "accountName": false,
-                    "password": "aaaaaaaaaaaaaa",
-                    "identitySecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
-                    "sharedSecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa="
-                }
-            }
-        ]
-    },
-    "notifications": {
-        "steamLoginSuccess": true,
-        "steamLoginFailed": true,
-        "connectEmpire": true,
-        "p2pItemUpdatedDelist": true,
-        "p2pItemUpdatedPriceChanged": true,
-        "tradeStatusSending": true,
-        "tradeStatusProcessing": true,
-        "tradeStatusCompleted": true,
-        "tradeStatusTimedOut": true,
-        "tradeStatusDodge": true,
-        "steamOfferConfirmed": true,
-        "badResponse": true
-    }
+	"settings": {
+		"logging": false,
+		"discord": {
+			"enabled": true,
+			"userId": "263780944031252482",
+			"discordHook": "https://discord.com/api/webhooks/788791748990206022/3ST-mjkiijagonagsnS214sdffasDFDSAfahgfdaH12412asdfdsfas2"
+		},
+		"pushover": {
+			"enabled": false,
+			"pushoverUser": "aaaaaaaaaaaaaa",
+			"pushoverToken": "aaaaaaaaaaaaaa"
+		},
+		"pricempire": {
+			"authToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		},
+		"csgoempire": [
+			{
+				"userId": 12345,
+				"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+				"securityCode": "0000",
+				"PHPSESSID": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"do_not_share_this_with_anyone_not_even_staff": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"csgotrader": false,
+				"origin": "csgoempire.com",
+				"delistThreshold": 5,
+				"steam": {
+					"accountName": false,
+					"password": "aaaaaaaaaaaaaa",
+					"identitySecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+					"sharedSecret": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa=",
+					"acceptOffers": true
+				}
+			}
+		]
+	},
+	"notifications": {
+		"steamLoginSuccess": true,
+		"steamLoginFailed": true,
+		"connectEmpire": true,
+		"p2pItemUpdatedDelist": true,
+		"p2pItemUpdatedPriceChanged": true,
+		"tradeStatusSending": true,
+		"tradeStatusProcessing": true,
+		"tradeStatusCompleted": true,
+		"tradeStatusTimedOut": true,
+		"tradeStatusDodge": true,
+		"steamOfferConfirmed": true,
+		"badResponse": true
+	}
 }

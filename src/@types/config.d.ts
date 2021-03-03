@@ -32,6 +32,7 @@ interface Steam {
 	password: string;
 	sharedSecret: string;
 	identitySecret: string;
+	acceptOffers: boolean
 }
 
 interface Settings {

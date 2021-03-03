@@ -39,20 +39,22 @@ export class SteamService {
 							}
 						);
 
-						// Accepts all offers empty from our side
-						this.managers[config.steam.accountName].on(
-							"newOffer",
-							(offer) => {
-								if (
-									offer.itemsToGive.length > 0 &&
-									!offer.isOurOffer
-								) {
-									offer.decline();
-								} else {
-									offer.accept();
+						if (config.steam.acceptOffers) {
+							// Accepts all offers empty from our side
+							this.managers[config.steam.accountName].on(
+								"newOffer",
+								(offer) => {
+									if (
+										offer.itemsToGive.length > 0 &&
+										!offer.isOurOffer
+									) {
+										offer.decline();
+									} else {
+										offer.accept();
+									}
 								}
-							}
-						);
+							);
+						}
 					} catch (err) {
 						this.helperService.sendMessage(
 							`Steam login fail for ${config.steam.accountName}: ${err.message}`,
