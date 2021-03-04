@@ -371,37 +371,4 @@ export class CsgoempireService {
 			);
 		}
 	}
-	public async securityToken(userId: number) {
-		const config = this.config.settings.csgoempire.find(
-			(config) => config.userId === userId
-		);
-		let data = {
-			code: config.securityCode,
-			uuid: config.uuid,
-		};
-		const options = await this.getRequestConfig(userId);
-		// if (config.securityCode === "0000") {
-		//   data["type"] = "standard";
-		//   data["remember_device"] = false;
-		// }
-		try {
-			const body = (
-				await axios.post(
-					`https://${config.origin}/api/v2/user/security/token`,
-					data,
-					options
-				)
-			).data as SecurityTokenResponse;
-			if (body.success) {
-				return body.token;
-			} else {
-				return false;
-			}
-		} catch (e) {
-			await this.helperService.sendMessage(
-				`Bad response from ${config.origin} at 'securityToken', ${e.message}`,
-				"badResponse"
-			);
-		}
-	}
 }
