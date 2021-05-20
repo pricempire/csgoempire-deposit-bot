@@ -71,7 +71,7 @@ export class CsgoempireService {
 		const config = this.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
-		this.sockets[`user_${userId}`] = io(`wss://trade.${config.origin}/`, {
+		this.sockets[`user_${userId}`] = io(`wss://trade.${config.origin}/trade`, {
 			transports: ["websocket"],
 			path: "/s/",
 			secure: true,
@@ -125,10 +125,8 @@ export class CsgoempireService {
 					-1; // We multiply it by -1 to be able to compare it with the threshold set by the user
 				const prefix = percent > 0 ? "-" : "+";
 				this.helperService.sendMessage(
-					`Price changed for ${item.market_name}, ${
-						item.market_value / 100
-					} => ${originalItemPrice / 100} - ${prefix}${
-						percent < 0 ? percent * -1 : percent
+					`Price changed for ${item.market_name}, ${item.market_value / 100
+					} => ${originalItemPrice / 100} - ${prefix}${percent < 0 ? percent * -1 : percent
 					}%`,
 					"p2pItemUpdatedPriceChanged"
 				);
