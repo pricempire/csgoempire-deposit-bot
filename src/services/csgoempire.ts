@@ -23,7 +23,8 @@ export class CsgoempireService {
 			this.config.settings.csgoempire,
 			async (config) => {
 				this.initSocket(config.userId);
-				await this.pricempirePeer(config.userId);
+				// DISABLED
+				// await this.pricempirePeer(config.userId);
 				await this.helperService.delay(5000);
 			}
 		);
