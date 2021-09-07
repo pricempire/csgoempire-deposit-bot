@@ -193,6 +193,9 @@ export class CsgoempireService {
 							break;
 						case "Sending":
 							// do not send duplicated offers
+							if (!status.data.metadata.trade_url) {
+								return;
+							}
 							if (
 								this.offerSentFor.indexOf(status.data.id) === -1
 							) {
