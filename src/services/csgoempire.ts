@@ -171,7 +171,7 @@ export class CsgoempireService {
 					itemTotalValue >= originalItemPrice ||
 					percent <= config.delistThreshold
 				) {
-					switch (status.data.status_text) {
+					switch (status.data.status_message) {
 						case "Processing":
 							this.depositItems[
 								`item_${status.data.id}`
