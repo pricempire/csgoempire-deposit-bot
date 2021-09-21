@@ -182,10 +182,10 @@ export class CsgoempireService {
 							);
 							break;
 						case "Confirming":
-							const confirm = await this.confirmTrade(
-								config.userId,
-								status.data.id
-							);
+							// const confirm = await this.confirmTrade(
+							// 	config.userId,
+							// 	status.data.id
+							// );
 							await this.helperService.sendMessage(
 								`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
 								"tradeStatusProcessing"
