@@ -274,7 +274,7 @@ export class CsgoempireService {
 		try {
 			const response = (
 				await axios.get(
-					`https://${config.origin}/api/v2/trade/trades`,
+					`https://${config.origin}/api/v2/trading/user/trades`,
 					options
 				)
 			).data as DepositResponse;
@@ -319,7 +319,7 @@ export class CsgoempireService {
 		try {
 			return (
 				await axios.get(
-					`https://${config.origin}/api/v2/inventory/user?app=730`,
+					`https://${config.origin}/api/v2/trading/user/inventory?app=730`,
 					options
 				)
 			).data as InventoryResponse;
@@ -339,7 +339,7 @@ export class CsgoempireService {
 		try {
 			return (
 				await axios.post(
-					`https://${config.origin}/api/v2/trade/steam/deposit/cancel`,
+					`https://${config.origin}/api/v2/trading/deposit/${botId}/cancel`,
 					{ id: botId },
 					options
 				)
