@@ -15,9 +15,9 @@
         "csgoempire": [
             {
                 "userId": 12345, // Userid from your 'do_not_share_this_with_anyone_not_even_staff' cookie (first few number).
-				"userAgent": "12345 API Bot", // replace 12345 with your userid
+                "userAgent": "12345 API Bot", // replace 12345 with your userid
                 "origin": "csgoempire.com", // The site you using for trading.
-				"csgoempireApiKey": "12345678923456789234567", // https://csgoempire.com/trading/apikey
+                "csgoempireApiKey": "12345678923456789234567", // https://csgoempire.com/trading/apikey
                 "csgotrader": false, // set true if you using Gery's chrome extension, to autosend the offers
                 "delistThreshold": 5,// The percentage to delist the item if its drop in price.
                 "steam": {
