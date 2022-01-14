@@ -12,7 +12,6 @@ interface Pushover {
 
 interface Csgoempire {
 	userId: number;
-	userAgent: string;
 	steam: Steam;
 	csgotrader: boolean;
 	origin: string;

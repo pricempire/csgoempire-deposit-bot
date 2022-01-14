@@ -34,7 +34,7 @@ export class CsgoempireService {
 		);
 		return {
 			headers: {
-				"user-agent": config.userAgent,
+				"user-agent": `${config.userId} API Bot`,
 				'Authorization': `Bearer ${config.csgoempireApiKey}`
 			},
 		};
@@ -51,7 +51,7 @@ export class CsgoempireService {
 			rejectUnauthorized: false,
 			reconnect: true,
 			extraHeaders: {
-				"User-agent": config.userAgent,
+				"user-agent": `${config.userId} API Bot`,
 			},
 		});
 		this.sockets[`user_${userId}`].on("error", (err, v) => {
