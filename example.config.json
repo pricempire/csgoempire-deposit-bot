@@ -11,16 +11,10 @@
 			"pushoverUser": "aaaaaaaaaaaaaa",
 			"pushoverToken": "aaaaaaaaaaaaaa"
 		},
-		"pricempire": {
-			"authToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-		},
 		"csgoempire": [
 			{
 				"userId": 12345,
-				"userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
-				"securityCode": "0000",
-				"PHPSESSID": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-				"do_not_share_this_with_anyone_not_even_staff": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				"csgoempireApiKey": "abc123",
 				"csgotrader": false,
 				"origin": "csgoempire.com",
 				"delistThreshold": 5,
