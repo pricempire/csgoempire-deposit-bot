@@ -12,17 +12,12 @@
             "pushoverUser": "aaaaaaaaaaaaaa",
             "pushoverToken": "aaaaaaaaaaaaaa"
         },
-        "pricempire": {
-            "authToken": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" // Pricempire token from https://pricempire.com/docs-api (doesn't need sub to use this)
-        },
         "csgoempire": [
             {
                 "userId": 12345, // Userid from your 'do_not_share_this_with_anyone_not_even_staff' cookie (first few number).
-                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36", // If you using 2FA, this must be setted correctly.
-                "securityCode": "0000", // Your CSGOEmpire security code.
-                "PHPSESSID": "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",// Your CSGOEmpire PHPSESSID.
-                "do_not_share_this_with_anyone_not_even_staff": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",// Your CSGOEmpire do_not_share_this_with_anyone_not_even_staff.
+				"userAgent": "445394 API Bot", // replace 445394 to your userid
                 "origin": "csgoempire.com", // The site you using for trading.
+				"csgoempireApiKey": "12345678923456789234567", // https://csgoempire.com/trading/apikey
                 "csgotrader": false, // set true if you using Gery's chrome extension, to autosend the offers
                 "delistThreshold": 5,// The percentage to delist the item if its drop in price.
                 "steam": {

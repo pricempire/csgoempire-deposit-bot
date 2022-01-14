@@ -2,8 +2,6 @@ import axios, { AxiosRequestConfig } from "axios";
 import { HelperService } from "./helper";
 import { SteamService } from "./steam";
 
-import cookieParser from "cookie";
-
 const io = require("socket.io-client");
 const open = require("open");
 
@@ -23,48 +21,21 @@ export class CsgoempireService {
 			this.config.settings.csgoempire,
 			async (config) => {
 				this.initSocket(config.userId);
-				// DISABLED
-				// await this.pricempirePeer(config.userId);
 				await this.helperService.delay(5000);
 			}
 		);
 	}
 
-	private async pricempirePeer(userId) {
-		setTimeout(async () => {
-			await this.pricempirePeer(userId);
-		}, 30 * 60 * 1000);
-		const inventory = await this.getUserInventory(userId);
-		if (inventory) {
-			inventory.data.forEach((item) => {
-				this.pricempire.emit("price-commit", {
-					itemName: item.market_name,
-					price: item.market_value,
-				});
-			});
-		}
-	}
 	private async getRequestConfig(
 		userId: number
 	): Promise<AxiosRequestConfig> {
 		const config = this.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
-		const cookies = [
-			"PHPSESSID",
-			"do_not_share_this_with_anyone_not_even_staff",
-		];
-		let cookieString = "";
-		for (const cookie of cookies) {
-			let c = cookie; // Cookie Name
-			let v = config[cookie]; // Cookie Value
-			cookieString += cookieParser.serialize(c, v) + "; ";
-		}
 		return {
 			headers: {
 				"user-agent": config.userAgent,
-				// "x-empire-device-identifier": config.uuid,
-				cookie: cookieString.slice(0, -2),
+				'Authorization': `Bearer ${config.csgoempireApiKey}`
 			},
 		};
 	}
@@ -301,7 +272,7 @@ export class CsgoempireService {
 		try {
 			return (
 				await axios.get(
-					`https://${config.origin}/api/v2/metadata`,
+					`https://${config.origin}/api/v2/metadata/socket`,
 					options
 				)
 			).data as MetaResponse;

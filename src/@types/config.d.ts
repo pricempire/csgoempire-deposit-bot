@@ -10,20 +10,14 @@ interface Pushover {
 	pushoverToken: string;
 }
 
-interface Pricempire {
-	authToken: string;
-}
-
 interface Csgoempire {
 	userId: number;
 	userAgent: string;
-	securityCode: string;
-	PHPSESSID: string;
-	do_not_share_this_with_anyone_not_even_staff: string;
 	steam: Steam;
 	csgotrader: boolean;
 	origin: string;
 	delistThreshold: number;
+	csgoempireApiKey: string;
 }
 interface Steam {
 	accountName: string;
@@ -37,7 +31,6 @@ interface Settings {
 	logging: boolean;
 	discord: Discord;
 	pushover: Pushover;
-	pricempire: Pricempire;
 	csgoempire: Csgoempire[];
 }
 
