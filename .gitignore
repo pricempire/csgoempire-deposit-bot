@@ -1,4 +1,4 @@
-config.json
+config.backup.json
 node_modules
 dist/*
 yarn.lock
