@@ -14,8 +14,6 @@ You can configure the bot as you want.
 - Auto send the offer via [Browser Extension](https://csgotrader.app/).
 - Discord Notifications.
 - Pushover Notifications.
-- [Pricempire.com](https://pricempire.com/peer) Price-Peer.
-
 
 ## Installation
 
@@ -26,15 +24,6 @@ Install Node.js v12 from [here](https://nodejs.org/dist/v12.17.0/node-v12.17.0-x
 - Rename **example.config.json** file to **config.json**
 - Edit the **example.config.json** file
 - Open **start.cmd**
-
-
-## Cookies
-This script require 2 cookies from your browser.
-
-- PHPSESSID
-- do_not_share_this_with_anyone_not_even_staff
-
-You have to put the correct cookies to the config.json
 
 #### For the steam config, you need [SDA](https://github.com/Jessecar96/SteamDesktopAuthenticator) to get the sharedSecret & identitySecret.
 
