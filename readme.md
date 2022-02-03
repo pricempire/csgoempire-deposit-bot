@@ -33,7 +33,7 @@ Install Node.js v12 from [here](https://nodejs.org/dist/v12.17.0/node-v12.17.0-x
 
  
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what would you like to change.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you want to change.
 
 Please make sure to update tests as appropriate.
 
