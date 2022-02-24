@@ -9,62 +9,65 @@ export class SteamService {
 	private helperService: HelperService;
 	private steam = new SteamCommunity();
 	private config: Config = require("../../config.json");
+
 	constructor() {
 		this.helperService = new HelperService();
-		this.helperService.asyncForEach(
-			this.config.settings.csgoempire,
-			async (config: Csgoempire) => {
-				if (config.steam.accountName) {
-					try {
-						const cookies = await this.login(config.steam);
-						this.helperService.sendMessage(
-							`Steam login success for ${config.steam.accountName}`,
-							"steamLoginSuccess"
-						);
-						this.managers[
-							config.steam.accountName
-						] = new TradeOfferManager({
-							domain: "localhost",
-							language: "en",
-							pollInterval: 120000,
-							// cancelTime: 9 * 60 * 1000, // cancel outgoing offers after 9mins
-						});
-						this.managers[config.steam.accountName].setCookies(
-							cookies,
-							function (err) {
-								if (err) {
-									console.log(err);
-									return;
+		this.init();
+	}
+
+	async init() {
+		for await (const config of this.config.settings.csgoempire) {
+
+			if (config.steam.accountName) {
+				try {
+					const cookies = await this.login(config.steam);
+					this.helperService.sendMessage(
+						`Steam login success for ${config.steam.accountName}`,
+						"steamLoginSuccess"
+					);
+					this.managers[
+						config.steam.accountName
+					] = new TradeOfferManager({
+						domain: "localhost",
+						language: "en",
+						pollInterval: 120000,
+						// cancelTime: 9 * 60 * 1000, // cancel outgoing offers after 9mins
+					});
+					this.managers[config.steam.accountName].setCookies(
+						cookies,
+						function (err) {
+							if (err) {
+								console.log(err);
+								return;
+							}
+						}
+					);
+
+					if (config.steam.acceptOffers) {
+						// Accepts all offers empty from our side
+						this.managers[config.steam.accountName].on(
+							"newOffer",
+							(offer) => {
+								if (
+									offer.itemsToGive.length > 0 &&
+									!offer.isOurOffer
+								) {
+									// offer.decline();
+								} else {
+									offer.accept();
 								}
 							}
 						);
-
-						if (config.steam.acceptOffers) {
-							// Accepts all offers empty from our side
-							this.managers[config.steam.accountName].on(
-								"newOffer",
-								(offer) => {
-									if (
-										offer.itemsToGive.length > 0 &&
-										!offer.isOurOffer
-									) {
-										offer.decline();
-									} else {
-										offer.accept();
-									}
-								}
-							);
-						}
-					} catch (err) {
-						this.helperService.sendMessage(
-							`Steam login fail for ${config.steam.accountName}: ${err.message}`,
-							"steamLoginFailed"
-						);
 					}
-					await this.helperService.delay(10000);
+				} catch (err) {
+					this.helperService.sendMessage(
+						`Steam login fail for ${config.steam.accountName}: ${err.message}`,
+						"steamLoginFailed"
+					);
 				}
+				await this.helperService.delay(10000);
 			}
-		);
+		}
 	}
 	async steamGuardConfirmation(offer, identitySecret) {
 		this.steam.acceptConfirmationForObject(

@@ -17,13 +17,12 @@ export class CsgoempireService {
 	constructor() {
 		this.helperService = new HelperService();
 		this.steamService = new SteamService();
-		this.helperService.asyncForEach(
-			this.config.settings.csgoempire,
-			async (config) => {
+		(async () => {
+			for await (const config of this.config.settings.csgoempire) {
 				this.initSocket(config.userId);
 				await this.helperService.delay(5000);
 			}
-		);
+		})();
 	}
 
 	private async getRequestConfig(
@@ -144,6 +143,10 @@ export class CsgoempireService {
 				) {
 					switch (status.data.status_message) {
 						case "Processing":
+
+							if (this.config.settings.debug) {
+								console.log('Socket:Processing', itemName);
+							}
 							this.depositItems[
 								`item_${status.data.id}`
 							] = itemTotalValue;
@@ -153,16 +156,18 @@ export class CsgoempireService {
 							);
 							break;
 						case "Confirming":
-							// const confirm = await this.confirmTrade(
-							// 	config.userId,
-							// 	status.data.id
-							// );
+							if (this.config.settings.debug) {
+								console.log('Socket:Processing', itemName);
+							}
 							await this.helperService.sendMessage(
 								`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
 								"tradeStatusProcessing"
 							);
 							break;
 						case "Sending":
+							if (this.config.settings.debug) {
+								console.log('Socket:Sending', status.data);
+							}
 							if (!status.data.metadata.trade_url || status.data.metadata.trade_url === null || status.data.metadata.trade_url === 'null') {
 								return;
 							}

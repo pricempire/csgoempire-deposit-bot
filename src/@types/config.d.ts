@@ -27,6 +27,7 @@ interface Steam {
 }
 
 interface Settings {
+	debug: boolean;
 	logging: boolean;
 	discord: Discord;
 	pushover: Pushover;
