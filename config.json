@@ -42,6 +42,7 @@
 		"tradeStatusDodge": true,
 		"tradeStatusCanceled": true,
 		"steamOfferConfirmed": true,
-		"badResponse": true
+		"badResponse": true,
+		"steamSessionExpired": true,
 	}
 }

@@ -33,6 +33,7 @@ export class SteamService {
 						pollInterval: 120000,
 						// cancelTime: 9 * 60 * 1000, // cancel outgoing offers after 9mins
 					});
+
 					this.managers[config.steam.accountName].setCookies(
 						cookies,
 						function (err) {
@@ -42,6 +43,26 @@ export class SteamService {
 							}
 						}
 					);
+
+					this.steam.on('sessionExpired', async () => {
+						this.helperService.sendMessage(
+							`Steam session expired for ${config.steam.accountName}`,
+							"steamSessionExpired"
+						);
+
+						// Sign back in
+						let cookies = await this.login(config.steam);
+
+						this.managers[config.steam.accountName].setCookies(
+							cookies,
+							function (err) {
+								if (err) {
+									console.log(err);
+									return;
+								}
+							}
+						);
+					});
 
 					if (config.steam.acceptOffers) {
 						// Accepts all offers empty from our side
