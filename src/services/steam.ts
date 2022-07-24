@@ -90,12 +90,14 @@ export class SteamService {
 			}
 		);
 	}
-	async send(offer) {
+	async send(offer) { 
 		await offer.send((err, status) => {
 			if (err) {
-				setTimeout(async () => {
-					await this.send(offer);
-				}, 10000); // Try to send the offer every 10 seconds, when there's no success
+				console.log('Sending failed, resend it in 10 seconds.', offer);
+				await this.helperService.delay(1e4);
+				await this.send(offer); 
+			} else {
+				console.log('Offer sent', offer, status);
 			}
 		});
 	}
@@ -118,12 +120,11 @@ export class SteamService {
 		await this.send(offer);
 
 		// Wait 10 seconds to prevent offer id being null and breaking Steam Guard Confirmation
-		setTimeout(async () => {
-			await this.steamGuardConfirmation(
-				offer,
-				config.steam.identitySecret
-			);
-		}, 10000);
+		await this.helperService.delay(1e4); 
+		await this.steamGuardConfirmation(
+			offer,
+			config.steam.identitySecret
+		); 
 	}
 	async login(config: Steam) {
 		return new Promise((resolve, reject) => {
