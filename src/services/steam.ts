@@ -94,11 +94,11 @@ export class SteamService {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
-					console.log('Sending failed, resend it in 10 seconds.', offer);
+					console.log('Sending failed, resend it in 10 seconds.');
 					await this.helperService.delay(1e4);
 					return await this.send(offer); 
 				} else {
-					console.log('Offer sent', offer, status);
+					console.log('Offer sent');
 					return resolve();
 				}
 			});
