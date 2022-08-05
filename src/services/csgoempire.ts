@@ -195,8 +195,7 @@ export class CsgoempireService {
 										"tradeStatusSending"
 									);
 									await open(
-										`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
-										{ app: "chrome" }
+										`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`
 									);
 								} else {
 									await this.helperService.sendMessage(
