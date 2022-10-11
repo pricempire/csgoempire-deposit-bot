@@ -32,6 +32,7 @@ export class SteamService {
 						language: "en",
 						pollInterval: 120000,
 						// cancelTime: 9 * 60 * 1000, // cancel outgoing offers after 9mins
+						community: this.steam,
 					});
 
 					this.managers[config.steam.accountName].setCookies(
