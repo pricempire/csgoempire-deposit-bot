@@ -39,9 +39,9 @@ export class CsgoempireService {
 			},
 		};
 	}
-	private initTracker(id: number, status: TradeStatus) {
+	private initTracker(status: TradeStatus) {
 		console.log(`Trade Tracker started for ${id}`);
-		this.trackers[`track_${id}`] = setTimeout(() => {
+		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${id}, re-sending.`,
 				"tradeStatusCanceled"
@@ -87,7 +87,7 @@ export class CsgoempireService {
 					`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
 					{ app: "chrome" }
 				);
-				this.initTracker(status.data.id, status);
+				this.initTracker(status);
 			} else {
 				await this.helperService.sendMessage(
 					`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
