@@ -112,8 +112,8 @@ export class SteamService {
 		sendItems.forEach((item) => {
 			items.push({
 				assetid: item.asset_id,
-				appid: item.app_id,
-				contextid: item.context_id,
+				appid: 730,
+				contextid: "2",
 			});
 		});
 		const offer = this.managers[config.steam.accountName].createOffer(
