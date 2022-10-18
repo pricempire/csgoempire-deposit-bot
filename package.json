@@ -11,8 +11,7 @@
     },
     "author": "",
     "license": "ISC",
-    "devDependencies": {
-        "@types/express": "^4.16.1",
+    "devDependencies": { 
         "@types/request-promise": "^4.1.47",
         "tslint": "^5.12.1",
         "typescript": "^3.3.3"
