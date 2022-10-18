@@ -53,7 +53,7 @@ export class CsgoempireService {
 		console.log(`Trade Tracker cleared for ${id}`);
 		clearTimeout(this.trackers[`track_${id}`]);
 	}
-	private send(status: TradeStatus) {
+	private async send(status: TradeStatus) {
 		if (this.config.settings.debug) {
 			console.log('Socket:Sending', status.data);
 		}
