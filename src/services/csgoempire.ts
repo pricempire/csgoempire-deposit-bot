@@ -13,6 +13,7 @@ export class CsgoempireService {
 	private offerSentFor = [];
 	private config: Config = require("../../config.json");
 	public pricempire;
+	private trackers = {};
 
 	constructor() {
 		this.helperService = new HelperService();
@@ -37,6 +38,63 @@ export class CsgoempireService {
 				'Authorization': `Bearer ${config.csgoempireApiKey}`
 			},
 		};
+	}
+	private initTracker(id: number, status: TradeStatus) {
+		console.log(`Trade Tracker started for ${id}`);
+		this.trackers[`track_${id}`] = setTimeout(() => {
+			this.helperService.sendMessage(
+				`Trade offer still not sent for ${id}, re-sending.`,
+				"tradeStatusCanceled"
+			);
+			await this.send(status);
+		}, 30 * 60 * 1000);
+	}
+	private clearTracker(id: number) { 
+		console.log(`Trade Tracker cleared for ${id}`);
+		clearTimeout(this.trackers[`track_${id}`]);
+	}
+	private send(status: TradeStatus) {
+		if (this.config.settings.debug) {
+			console.log('Socket:Sending', status.data);
+		}
+		if (!status.data.metadata.trade_url || status.data.metadata.trade_url === null || status.data.metadata.trade_url === 'null') {
+			return;
+		}
+		// do not send duplicated offers
+		if (
+			this.offerSentFor.indexOf(status.data.id) === -1
+		) {
+			this.offerSentFor.push(status.data.id);
+			const tradeURL = status.data.metadata.trade_url;
+			// console.log(`Tradelink: ${tradeURL}`);
+			// console.log(`Item: ${itemName}`);
+			if (config.steam && config.steam.accountName) {
+				this.steamService.sendOffer(
+					status.data.items,
+					tradeURL,
+					userId
+				);
+			} else if (config.csgotrader) {
+				const assetIds = [];
+				status.data.items.forEach((item) => {
+					assetIds.push(item.asset_id);
+				});
+				await this.helperService.sendMessage(
+					`Opening tradelink for ${itemName} - ${itemPrice} coins`,
+					"tradeStatusSending"
+				);
+				await open(
+					`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
+					{ app: "chrome" }
+				);
+				this.initTracker(status.data.id, status);
+			} else {
+				await this.helperService.sendMessage(
+					`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
+					"tradeStatusSending"
+				);
+			}
+		}
 	}
 	private initSocket(userId) {
 		const config = this.config.settings.csgoempire.find(
@@ -165,48 +223,13 @@ export class CsgoempireService {
 							);
 							break;
 						case "Sending":
-							if (this.config.settings.debug) {
-								console.log('Socket:Sending', status.data);
-							}
-							if (!status.data.metadata.trade_url || status.data.metadata.trade_url === null || status.data.metadata.trade_url === 'null') {
-								return;
-							}
-							// do not send duplicated offers
-							if (
-								this.offerSentFor.indexOf(status.data.id) === -1
-							) {
-								this.offerSentFor.push(status.data.id);
-								const tradeURL = status.data.metadata.trade_url;
-								// console.log(`Tradelink: ${tradeURL}`);
-								// console.log(`Item: ${itemName}`);
-								if (config.steam && config.steam.accountName) {
-									this.steamService.sendOffer(
-										status.data.items,
-										tradeURL,
-										userId
-									);
-								} else if (config.csgotrader) {
-									const assetIds = [];
-									status.data.items.forEach((item) => {
-										assetIds.push(item.asset_id);
-									});
-									await this.helperService.sendMessage(
-										`Opening tradelink for ${itemName} - ${itemPrice} coins`,
-										"tradeStatusSending"
-									);
-									await open(
-										`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
-										{ app: "chrome" }
-									);
-								} else {
-									await this.helperService.sendMessage(
-										`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
-										"tradeStatusSending"
-									);
-								}
-							}
+							await this.send(status);
 							break;
 
+						case "Sent":{
+							this.removeTracker(status.data.id);
+							break;
+						}
 						case "Completed":
 							await this.helperService.sendMessage(
 								`${itemName} has sold for ${itemPrice}`,
