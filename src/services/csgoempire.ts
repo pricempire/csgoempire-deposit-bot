@@ -38,26 +38,24 @@ export class CsgoempireService {
 				'Authorization': `Bearer ${config.csgoempireApiKey}`
 			},
 		};
-	}
-	private initTracker(status: TradeStatus, config: any) {
-		console.log(`Trade Tracker started for ${id}`);
+	} 
+	private initTracker(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
+		console.log(`Trade Tracker started for ${status.data.id}`);
 		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
 			this.helperService.sendMessage(
-				`Trade offer still not sent for ${id}, re-sending.`,
+				`Trade offer still not sent for ${status.data.id}, re-sending.`,
 				"tradeStatusCanceled"
 			);
-			await this.send(status, config);
+			await this.send(status, config, userId, itemName, itemPrice);
 		}, 30 * 60 * 1000);
 	}
 	private clearTracker(id: number) { 
 		console.log(`Trade Tracker cleared for ${id}`);
 		clearTimeout(this.trackers[`track_${id}`]);
 	}
-	private async send(status: TradeStatus, config: any) {
+	// (status, config, userId, itemName, itemPrice)
+	private async send(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
 
-		if (this.config.settings.debug) {
-			console.log('Socket:Sending', status.data);
-		}
 		if (!status.data.metadata.trade_url || status.data.metadata.trade_url === null || status.data.metadata.trade_url === 'null') {
 			return;
 		}
@@ -88,7 +86,7 @@ export class CsgoempireService {
 					`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
 					{ app: "chrome" }
 				);
-				this.initTracker(status, config);
+				this.initTracker(status, config, userId, itemName, itemPrice);
 			} else {
 				await this.helperService.sendMessage(
 					`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
@@ -202,10 +200,7 @@ export class CsgoempireService {
 				) {
 					switch (status.data.status_message) {
 						case "Processing":
-
-							if (this.config.settings.debug) {
-								console.log('Socket:Processing', itemName);
-							}
+ 
 							this.depositItems[
 								`item_${status.data.id}`
 							] = itemTotalValue;
@@ -214,17 +209,14 @@ export class CsgoempireService {
 								"tradeStatusProcessing"
 							);
 							break;
-						case "Confirming":
-							if (this.config.settings.debug) {
-								console.log('Socket:Processing', itemName);
-							}
+						case "Confirming": 
 							await this.helperService.sendMessage(
 								`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
 								"tradeStatusProcessing"
 							);
 							break;
 						case "Sending":
-							await this.send(status, config);
+							await this.send(status, config, userId, itemName, itemPrice);
 							break;
 
 						case "Sent":{
