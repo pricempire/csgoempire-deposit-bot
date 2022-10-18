@@ -54,6 +54,11 @@ export class CsgoempireService {
 		clearTimeout(this.trackers[`track_${id}`]);
 	}
 	private async send(status: TradeStatus) {
+
+		const config = this.config.settings.csgoempire.find(
+			(config) => config.userId === userId
+		);
+		
 		if (this.config.settings.debug) {
 			console.log('Socket:Sending', status.data);
 		}
