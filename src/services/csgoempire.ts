@@ -39,26 +39,22 @@ export class CsgoempireService {
 			},
 		};
 	}
-	private initTracker(status: TradeStatus) {
+	private initTracker(status: TradeStatus, config: any) {
 		console.log(`Trade Tracker started for ${id}`);
 		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${id}, re-sending.`,
 				"tradeStatusCanceled"
 			);
-			await this.send(status);
+			await this.send(status, config);
 		}, 30 * 60 * 1000);
 	}
 	private clearTracker(id: number) { 
 		console.log(`Trade Tracker cleared for ${id}`);
 		clearTimeout(this.trackers[`track_${id}`]);
 	}
-	private async send(status: TradeStatus) {
+	private async send(status: TradeStatus, config: any) {
 
-		const config = this.config.settings.csgoempire.find(
-			(config) => config.userId === userId
-		);
-		
 		if (this.config.settings.debug) {
 			console.log('Socket:Sending', status.data);
 		}
@@ -92,7 +88,7 @@ export class CsgoempireService {
 					`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
 					{ app: "chrome" }
 				);
-				this.initTracker(status);
+				this.initTracker(status, config);
 			} else {
 				await this.helperService.sendMessage(
 					`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
@@ -228,11 +224,11 @@ export class CsgoempireService {
 							);
 							break;
 						case "Sending":
-							await this.send(status);
+							await this.send(status, config);
 							break;
 
 						case "Sent":{
-							this.removeTracker(status.data.id);
+							this.clearTracker(status.data.id);
 							break;
 						}
 						case "Completed":
