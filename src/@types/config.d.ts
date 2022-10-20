@@ -45,6 +45,7 @@ interface Notifications {
 	tradeStatusTimedOut: boolean;
 	tradeStatusDodge: boolean;
 	steamOfferConfirmed: boolean;
+	steamSessionExpired: boolean;
 	badResponse: boolean;
 }
 

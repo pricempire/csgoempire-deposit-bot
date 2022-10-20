@@ -60,6 +60,9 @@ export class HelperService {
 		steamOfferConfirmed: {
 			color: this.colors.FgGreen,
 		},
+		steamSessionExpired: {
+			color: this.colors.FgRed,
+		},
 		badResponse: {
 			color: this.colors.FgRed,
 		},
