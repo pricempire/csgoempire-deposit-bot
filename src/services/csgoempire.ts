@@ -42,7 +42,7 @@ export class CsgoempireService {
 	private initTracker(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
 		console.log(`Trade Tracker started for ${status.data.id}`);
 		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
-			this.offerSentFor.pop(status.data.id);
+			this.offerSentFor.filter(offerId => offerId !== status.data.id);
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${status.data.id}, re-sending.`,
 				"tradeStatusCanceled"
