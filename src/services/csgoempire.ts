@@ -38,10 +38,11 @@ export class CsgoempireService {
 				'Authorization': `Bearer ${config.csgoempireApiKey}`
 			},
 		};
-	} 
+	}
 	private initTracker(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
 		console.log(`Trade Tracker started for ${status.data.id}`);
 		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
+			this.offerSentFor.pop(status.data.id);
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${status.data.id}, re-sending.`,
 				"tradeStatusCanceled"
@@ -49,7 +50,7 @@ export class CsgoempireService {
 			await this.send(status, config, userId, itemName, itemPrice);
 		}, 30 * 60 * 1000);
 	}
-	private clearTracker(id: number) { 
+	private clearTracker(id: number) {
 		console.log(`Trade Tracker cleared for ${id}`);
 		clearTimeout(this.trackers[`track_${id}`]);
 	}
@@ -200,7 +201,7 @@ export class CsgoempireService {
 				) {
 					switch (status.data.status_message) {
 						case "Processing":
- 
+
 							this.depositItems[
 								`item_${status.data.id}`
 							] = itemTotalValue;
@@ -209,7 +210,7 @@ export class CsgoempireService {
 								"tradeStatusProcessing"
 							);
 							break;
-						case "Confirming": 
+						case "Confirming":
 							await this.helperService.sendMessage(
 								`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
 								"tradeStatusProcessing"
@@ -219,7 +220,7 @@ export class CsgoempireService {
 							await this.send(status, config, userId, itemName, itemPrice);
 							break;
 
-						case "Sent":{
+						case "Sent": {
 							this.clearTracker(status.data.id);
 							break;
 						}
