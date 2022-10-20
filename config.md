@@ -44,7 +44,7 @@
 		"tradeStatusCanceled": true,
         "steamOfferConfirmed": true,
         "steamSessionExpired": true,
-        "badResponse": true,
+        "badResponse": true
     }
 }
 ```
