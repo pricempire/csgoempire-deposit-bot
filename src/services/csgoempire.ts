@@ -42,11 +42,11 @@ export class CsgoempireService {
 	private initTracker(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
 		console.log(`Trade Tracker started for ${status.data.id}`);
 		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
-			this.offerSentFor.filter(offerId => offerId !== status.data.id);
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${status.data.id}, re-sending.`,
 				"tradeStatusCanceled"
 			);
+			console.log('Re-send data', status);
 			await this.send(status, config, userId, itemName, itemPrice);
 		}, 30 * 60 * 1000);
 	}
@@ -60,40 +60,34 @@ export class CsgoempireService {
 		if (!status.data.metadata.trade_url || status.data.metadata.trade_url === null || status.data.metadata.trade_url === 'null') {
 			return;
 		}
-		// do not send duplicated offers
-		if (
-			this.offerSentFor.indexOf(status.data.id) === -1
-		) {
-			this.offerSentFor.push(status.data.id);
-			const tradeURL = status.data.metadata.trade_url;
-			// console.log(`Tradelink: ${tradeURL}`);
-			// console.log(`Item: ${itemName}`);
-			if (config.steam && config.steam.accountName) {
-				this.steamService.sendOffer(
-					status.data.items,
-					tradeURL,
-					userId
-				);
-			} else if (config.csgotrader) {
-				const assetIds = [];
-				status.data.items.forEach((item) => {
-					assetIds.push(item.asset_id);
-				});
-				await this.helperService.sendMessage(
-					`Opening tradelink for ${itemName} - ${itemPrice} coins`,
-					"tradeStatusSending"
-				);
-				await open(
-					`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
-					{ app: "chrome" }
-				);
-				this.initTracker(status, config, userId, itemName, itemPrice);
-			} else {
-				await this.helperService.sendMessage(
-					`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
-					"tradeStatusSending"
-				);
-			}
+		const tradeURL = status.data.metadata.trade_url;
+		// console.log(`Tradelink: ${tradeURL}`);
+		// console.log(`Item: ${itemName}`);
+		if (config.steam && config.steam.accountName) {
+			this.steamService.sendOffer(
+				status.data.items,
+				tradeURL,
+				userId
+			);
+		} else if (config.csgotrader) {
+			const assetIds = [];
+			status.data.items.forEach((item) => {
+				assetIds.push(item.asset_id);
+			});
+			await this.helperService.sendMessage(
+				`Opening tradelink for ${itemName} - ${itemPrice} coins`,
+				"tradeStatusSending"
+			);
+			await open(
+				`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
+				{ app: "chrome" }
+			);
+			this.initTracker(status, config, userId, itemName, itemPrice);
+		} else {
+			await this.helperService.sendMessage(
+				`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
+				"tradeStatusSending"
+			);
 		}
 	}
 	private initSocket(userId) {
