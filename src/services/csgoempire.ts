@@ -109,6 +109,8 @@ export class CsgoempireService {
 			console.log(`error: ${err}`);
 		});
 		this.sockets[`user_${userId}`].on("connect", async () => {
+			this.sockets[`user_${userId}`].emit('filters', { 'price_max': 9999999 });
+
 			this.helperService.sendMessage(
 				`Connected to empire.`,
 				"connectEmpire"
