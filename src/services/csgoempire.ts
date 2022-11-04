@@ -141,7 +141,7 @@ export class CsgoempireService {
 
 		this.sockets[`user_${userId}`].on("updated_item", async (payload: P2PNewItem[]) => {
 			const p2pItems = Array.isArray(payload) ? payload : [payload];
-			for await (const p2pItem of p2pItems) {
+			for await (const item of p2pItems) {
 				const originalItemPrice = this.depositItems[`item_${item.id}`];
 				if (originalItemPrice) {
 					const percent =
