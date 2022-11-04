@@ -137,113 +137,120 @@ export class CsgoempireService {
 			}
 		});
 
-		this.sockets[`user_${userId}`].on("p2p_updated_item", async (json) => {
-			const item = JSON.parse(json) as P2PNewItem;
-			const originalItemPrice = this.depositItems[`item_${item.id}`];
-			if (originalItemPrice) {
-				const percent =
-					((item.market_value - originalItemPrice) /
-						originalItemPrice) *
-					100 *
-					-1; // We multiply it by -1 to be able to compare it with the threshold set by the user
-				const prefix = percent > 0 ? "-" : "+";
-				this.helperService.sendMessage(
-					`Price changed for ${item.market_name}, ${item.market_value / 100
-					} => ${originalItemPrice / 100} - ${prefix}${percent < 0 ? percent * -1 : percent
-					}%`,
-					"p2pItemUpdatedPriceChanged"
-				);
-				if (percent > config.delistThreshold) {
-					const status = await this.delistItem(
-						config.userId,
-						item.bot_id
-					);
-
-					if (!status) return;
-
+		this.sockets[`user_${userId}`].on("updated_item", async (payload: P2PNewItem[]) => {
+			const p2pItems = Array.isArray(payload) ? payload : [payload];
+			for await (const p2pItem of p2pItems) {
+				const originalItemPrice = this.depositItems[`item_${item.id}`];
+				if (originalItemPrice) {
+					const percent =
+						((item.market_value - originalItemPrice) /
+							originalItemPrice) *
+						100 *
+						-1; // We multiply it by -1 to be able to compare it with the threshold set by the user
+					const prefix = percent > 0 ? "-" : "+";
 					this.helperService.sendMessage(
-						`${item.market_name} Delisted successfully`,
-						"p2pItemUpdatedDelist"
+						`Price changed for ${item.market_name}, ${item.market_value / 100
+						} => ${originalItemPrice / 100} - ${prefix}${percent < 0 ? percent * -1 : percent
+						}%`,
+						"p2pItemUpdatedPriceChanged"
 					);
+					if (percent > config.delistThreshold) {
+						const status = await this.delistItem(
+							config.userId,
+							item.bot_id
+						);
+
+						if (!status) return;
+
+						this.helperService.sendMessage(
+							`${item.market_name} Delisted successfully`,
+							"p2pItemUpdatedDelist"
+						);
+					}
 				}
 			}
 		});
 		this.sockets[`user_${userId}`].on(
 			"trade_status",
-			async (status: TradeStatus) => {
-				if (status.type != "deposit") {
-					return;
-				}
+			async (payload: TradeStatus[]) => {
 
-				const itemName = status.data.items[0].market_name;
-				const itemPrice = status.data.items[0].market_value; // Market value is given in decimals, we need to multiply to be able to compare with originalPrice
-				const itemTotalValue = status.data.total_value;
+				const statuses = Array.isArray(payload) ? payload : [payload];
+				for await (const status of statuses) {
 
-				const originalItemPrice = this.depositItems[
-					`item_${status.data.id}`
-				];
-
-				const percent =
-					((itemTotalValue - originalItemPrice) / originalItemPrice) *
-					100 *
-					-1; // We multiply the percentage change by -1 so we can compare it with the threshold set by the user
-
-				if (
-					!originalItemPrice ||
-					itemTotalValue >= originalItemPrice ||
-					percent <= config.delistThreshold
-				) {
-					switch (status.data.status_message) {
-						case "Processing":
-
-							this.depositItems[
-								`item_${status.data.id}`
-							] = itemTotalValue;
-							await this.helperService.sendMessage(
-								`User listed '${itemName}' for ${itemPrice} coins.`,
-								"tradeStatusProcessing"
-							);
-							break;
-						case "Confirming":
-							await this.helperService.sendMessage(
-								`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
-								"tradeStatusProcessing"
-							);
-							break;
-						case "Sending":
-							await this.send(status, config, userId, itemName, itemPrice);
-							break;
-
-						case "Sent": {
-							this.clearTracker(status.data.id);
-							break;
-						}
-						case "Completed":
-							await this.helperService.sendMessage(
-								`${itemName} has sold for ${itemPrice}`,
-								"tradeStatusCompleted"
-							);
-							break;
-
-						case "TimedOut":
-							await this.helperService.sendMessage(
-								`Deposit offer for ${itemName} was not accepted by buyer.`,
-								"tradeStatusTimedOut"
-							);
-							break;
-
-						case "Canceled":
-							await this.helperService.sendMessage(
-								`Trade for ${itemName} was canceled by user.`,
-								"tradeStatusCanceled"
-							);
-							break;
+					if (status.type != "deposit") {
+						return;
 					}
-				} else {
-					await this.helperService.sendMessage(
-						`Dodging item ${itemName} because it's changed in its price in a negative way.`,
-						"tradeStatusDodge"
-					);
+
+					const itemName = status.data.items[0].market_name;
+					const itemPrice = status.data.items[0].market_value; // Market value is given in decimals, we need to multiply to be able to compare with originalPrice
+					const itemTotalValue = status.data.total_value;
+
+					const originalItemPrice = this.depositItems[
+						`item_${status.data.id}`
+					];
+
+					const percent =
+						((itemTotalValue - originalItemPrice) / originalItemPrice) *
+						100 *
+						-1; // We multiply the percentage change by -1 so we can compare it with the threshold set by the user
+
+					if (
+						!originalItemPrice ||
+						itemTotalValue >= originalItemPrice ||
+						percent <= config.delistThreshold
+					) {
+						switch (status.data.status_message) {
+							case "Processing":
+
+								this.depositItems[
+									`item_${status.data.id}`
+								] = itemTotalValue;
+								await this.helperService.sendMessage(
+									`User listed '${itemName}' for ${itemPrice} coins.`,
+									"tradeStatusProcessing"
+								);
+								break;
+							case "Confirming":
+								await this.helperService.sendMessage(
+									`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
+									"tradeStatusProcessing"
+								);
+								break;
+							case "Sending":
+								await this.send(status, config, userId, itemName, itemPrice);
+								break;
+
+							case "Sent": {
+								this.clearTracker(status.data.id);
+								break;
+							}
+							case "Completed":
+								await this.helperService.sendMessage(
+									`${itemName} has sold for ${itemPrice}`,
+									"tradeStatusCompleted"
+								);
+								break;
+
+							case "TimedOut":
+								await this.helperService.sendMessage(
+									`Deposit offer for ${itemName} was not accepted by buyer.`,
+									"tradeStatusTimedOut"
+								);
+								break;
+
+							case "Canceled":
+								await this.helperService.sendMessage(
+									`Trade for ${itemName} was canceled by user.`,
+									"tradeStatusCanceled"
+								);
+								break;
+						}
+					} else {
+						await this.helperService.sendMessage(
+							`Dodging item ${itemName} because it's changed in its price in a negative way.`,
+							"tradeStatusDodge"
+						);
+					}
 				}
 			}
 		);
