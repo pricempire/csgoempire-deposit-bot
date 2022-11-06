@@ -21,7 +21,7 @@ Install Node.js v12 from [here](https://nodejs.org/dist/v12.17.0/node-v12.17.0-x
 - **Clone** this repository
 - **Unzip**
 - Open **install.cmd**
-- Edit the **config.json** file
+- Edit the **config.js** file
 - Open **start.cmd**
 
 #### For the steam config, you need [SDA](https://github.com/Jessecar96/SteamDesktopAuthenticator) to get the sharedSecret & identitySecret.

@@ -11,7 +11,7 @@ export class CsgoempireService {
 	private depositItems = {};
 	private sockets = {};
 	private offerSentFor = [];
-	private config: Config = require("../../config.json");
+	private config: Config = require("../../config");
 	public pricempire;
 	private trackers = {};
 
