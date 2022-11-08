@@ -40,18 +40,17 @@ export class CsgoempireService {
 		};
 	}
 	private initTracker(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
-		console.log(`Trade Tracker started for ${status.data.id}`);
+		this.helperService.log(`Trade Tracker started for ${status.data.id}`);
 		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${status.data.id}, re-sending.`,
 				"tradeStatusCanceled"
 			);
-			console.log('Re-send data', status);
 			await this.send(status, config, userId, itemName, itemPrice);
 		}, 30 * 60 * 1000);
 	}
 	private clearTracker(id: number) {
-		console.log(`Trade Tracker cleared for ${id}`);
+		this.helperService.log(`Trade Tracker cleared for ${id}`);
 		clearTimeout(this.trackers[`track_${id}`]);
 	}
 	// (status, config, userId, itemName, itemPrice)
@@ -61,8 +60,8 @@ export class CsgoempireService {
 			return;
 		}
 		const tradeURL = status.data.metadata.trade_url;
-		// console.log(`Tradelink: ${tradeURL}`);
-		// console.log(`Item: ${itemName}`);
+		// this.helperService.log(`Tradelink: ${tradeURL}`);
+		// this.helperService.log(`Item: ${itemName}`);
 		if (config.steam && config.steam.accountName) {
 			this.steamService.sendOffer(
 				status.data.items,
@@ -106,7 +105,7 @@ export class CsgoempireService {
 			},
 		});
 		this.sockets[`user_${userId}`].on("error", (err, v) => {
-			console.log(`error: ${err}`);
+			this.helperService.log(`error: ${err}`);
 		});
 		this.sockets[`user_${userId}`].on("connect", async () => {
 			this.sockets[`user_${userId}`].emit('filters', { 'price_max': 9999999 });
@@ -302,7 +301,7 @@ export class CsgoempireService {
 				)
 			).data as MetaResponse;
 		} catch (e) {
-			console.log(
+			this.helperService.log(
 				`Bad response from ${config.origin} at 'requestMetaModel'`
 			);
 		}
