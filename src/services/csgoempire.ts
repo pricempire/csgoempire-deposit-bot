@@ -226,6 +226,7 @@ export class CsgoempireService {
 								break;
 							}
 							case "Completed":
+								this.clearTracker(status.data.id);
 								await this.helperService.sendMessage(
 									`${itemName} has sold for ${itemPrice}`,
 									"tradeStatusCompleted"
