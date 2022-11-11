@@ -8,7 +8,6 @@ const dateFormat = require("dateformat");
 export class HelperService {
 	private config: Config = require("../../config");
 	private log_file;
-	private log_file_live;
 	private pushoverClient;
 	public delay = (ms) =>
 		new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
@@ -70,18 +69,15 @@ export class HelperService {
 	constructor() {
 		const now = new Date();
 		if (this.config.settings.logging) {
+			if (!fs.existsSync('./logs')) {
+				fs.mkdirSync('./logs');
+			}
 			this.log_file = fs.createWriteStream(
 				__dirname +
-					"/logs/debug." +
-					dateFormat(now, "yyyy_mm_dd_H_MM_ss.l") +
-					".log",
+				"/logs/debug." +
+				dateFormat(now, "yyyy_mm_dd_H_MM_ss.l") +
+				".log",
 				{ flags: "w" }
-			);
-			this.log_file_live = fs.createWriteStream(
-				__dirname + "/debug-live.log",
-				{
-					flags: "w",
-				}
 			);
 		}
 		if (this.config.settings.pushover.enabled) {
@@ -95,25 +91,18 @@ export class HelperService {
 		if (this.config.settings.logging) {
 			this.log_file.write(
 				"[" +
-					dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l") +
-					"] " +
-					util.format(d) +
-					"\n"
-			);
-			this.log_file_live.write(
-				"[" +
-					dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l") +
-					"] " +
-					util.format(d) +
-					"\n"
+				dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l") +
+				"] " +
+				util.format(d) +
+				"\n"
 			);
 		}
 		console.log(
 			color +
-				"[" +
-				dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l") +
-				"] " +
-				util.format(d),
+			"[" +
+			dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l") +
+			"] " +
+			util.format(d),
 			this.colors.FgWhite
 		);
 	}
