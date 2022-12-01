@@ -192,64 +192,64 @@ export class CsgoempireService {
 						100 *
 						-1; // We multiply the percentage change by -1 so we can compare it with the threshold set by the user
 
-					if (
-						!originalItemPrice ||
-						itemTotalValue >= originalItemPrice ||
-						percent <= config.delistThreshold
-					) {
-						switch (status.data.status_message) {
-							case "Processing":
+					// if (
+					// 	!originalItemPrice ||
+					// 	itemTotalValue >= originalItemPrice ||
+					// 	percent <= config.delistThreshold
+					// ) {
+					switch (status.data.status_message) {
+						case "Processing":
 
-								this.depositItems[
-									`item_${status.data.id}`
-								] = itemTotalValue;
-								await this.helperService.sendMessage(
-									`User listed '${itemName}' for ${itemPrice} coins.`,
-									"tradeStatusProcessing"
-								);
-								break;
-							case "Confirming":
-								await this.helperService.sendMessage(
-									`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
-									"tradeStatusProcessing"
-								);
-								break;
-							case "Sending":
-								await this.send(status, config, userId, itemName, itemPrice);
-								break;
+							this.depositItems[
+								`item_${status.data.id}`
+							] = itemTotalValue;
+							await this.helperService.sendMessage(
+								`User listed '${itemName}' for ${itemPrice} coins.`,
+								"tradeStatusProcessing"
+							);
+							break;
+						case "Confirming":
+							await this.helperService.sendMessage(
+								`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
+								"tradeStatusProcessing"
+							);
+							break;
+						case "Sending":
+							await this.send(status, config, userId, itemName, itemPrice);
+							break;
 
-							case "Sent": {
-								this.clearTracker(status.data.id);
-								break;
-							}
-							case "Completed":
-								this.clearTracker(status.data.id);
-								await this.helperService.sendMessage(
-									`${itemName} has sold for ${itemPrice}`,
-									"tradeStatusCompleted"
-								);
-								break;
-
-							case "TimedOut":
-								await this.helperService.sendMessage(
-									`Deposit offer for ${itemName} was not accepted by buyer.`,
-									"tradeStatusTimedOut"
-								);
-								break;
-
-							case "Canceled":
-								await this.helperService.sendMessage(
-									`Trade for ${itemName} was canceled by user.`,
-									"tradeStatusCanceled"
-								);
-								break;
+						case "Sent": {
+							this.clearTracker(status.data.id);
+							break;
 						}
-					} else {
-						await this.helperService.sendMessage(
-							`Dodging item ${itemName} because it's changed in its price in a negative way.`,
-							"tradeStatusDodge"
-						);
+						case "Completed":
+							this.clearTracker(status.data.id);
+							await this.helperService.sendMessage(
+								`${itemName} has sold for ${itemPrice}`,
+								"tradeStatusCompleted"
+							);
+							break;
+
+						case "TimedOut":
+							await this.helperService.sendMessage(
+								`Deposit offer for ${itemName} was not accepted by buyer.`,
+								"tradeStatusTimedOut"
+							);
+							break;
+
+						case "Canceled":
+							await this.helperService.sendMessage(
+								`Trade for ${itemName} was canceled by user.`,
+								"tradeStatusCanceled"
+							);
+							break;
 					}
+					// } else {
+					// 	await this.helperService.sendMessage(
+					// 		`Dodging item ${itemName} because it's changed in its price in a negative way.`,
+					// 		"tradeStatusDodge"
+					// 	);
+					// }
 				}
 			}
 		);
