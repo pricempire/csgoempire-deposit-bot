@@ -112,13 +112,13 @@ export class SteamService {
 			}
 		);
 	}
-	async send(offer) { 
+	async send(offer) {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
 					console.log('Sending failed, resend it in 10 seconds.');
 					await this.helperService.delay(1e4);
-					return await this.send(offer); 
+					return await this.send(offer);
 				} else {
 					console.log('Offer sent');
 					return resolve();
@@ -126,32 +126,30 @@ export class SteamService {
 			});
 		})
 	}
-	async sendOffer(sendItems, tradeURL: string, userId: number) {
+	async sendOffer(sendItem, tradeURL: string, userId: number) {
 		const config = this.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 		const items = [];
-		sendItems.forEach((item) => {
-			items.push({
-				assetid: item.asset_id,
-				appid: 730,
-				contextid: "2",
-			});
+		items.push({
+			assetid: sendItem.asset_id,
+			appid: 730,
+			contextid: "2",
 		});
 		const offer = this.managers[config.steam.accountName].createOffer(
 			tradeURL
 		);
 		offer.addMyItems(items);
-		try{
+		try {
 			await this.send(offer);
-	
+
 			// Wait 10 seconds to prevent offer id being null and breaking Steam Guard Confirmation
-			await this.helperService.delay(1e4); 
+			await this.helperService.delay(1e4);
 			await this.steamGuardConfirmation(
 				offer,
 				config.steam.identitySecret
-			); 
-		} catch(e) {
+			);
+		} catch (e) {
 			console.log('Error in steam sending', e);
 		}
 	}

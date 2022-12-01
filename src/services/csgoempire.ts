@@ -64,7 +64,7 @@ export class CsgoempireService {
 		// this.helperService.log(`Item: ${itemName}`);
 		if (config.steam && config.steam.accountName) {
 			this.steamService.sendOffer(
-				status.data.items,
+				status.data.item,
 				tradeURL,
 				userId
 			);
@@ -182,9 +182,8 @@ export class CsgoempireService {
 						return;
 					}
 
-					const itemName = status.data.items[0].market_name;
-					const itemPrice = status.data.items[0].market_value; // Market value is given in decimals, we need to multiply to be able to compare with originalPrice
-					const itemTotalValue = status.data.total_value;
+					const itemName = status.data.item.market_name;
+					const itemPrice, itemTotalValue = status.data.item.market_value; // Market value is given in decimals, we need to multiply to be able to compare with originalPrice
 
 					const originalItemPrice = this.depositItems[
 						`item_${status.data.id}`
