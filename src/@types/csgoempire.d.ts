@@ -221,7 +221,7 @@ interface Profile {
 }
 
 interface Data {
-	items: Item[];
+	item: Item;
 	metadata: Metadata;
 	id: number;
 	user_id: number;

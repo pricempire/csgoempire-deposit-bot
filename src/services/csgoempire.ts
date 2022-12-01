@@ -69,10 +69,7 @@ export class CsgoempireService {
 				userId
 			);
 		} else if (config.csgotrader) {
-			const assetIds = [];
-			status.data.items.forEach((item) => {
-				assetIds.push(item.asset_id);
-			});
+			const assetIds = [status.data.item.asset_id];
 			await this.helperService.sendMessage(
 				`Opening tradelink for ${itemName} - ${itemPrice} coins`,
 				"tradeStatusSending"
@@ -183,7 +180,8 @@ export class CsgoempireService {
 					}
 
 					const itemName = status.data.item.market_name;
-					const itemPrice, itemTotalValue = status.data.item.market_value; // Market value is given in decimals, we need to multiply to be able to compare with originalPrice
+					const itemTotalValue = status.data.item.market_value; // Market value is given in decimals, we need to multiply to be able to compare with originalPrice
+					const itemPrice = itemTotalValue;
 
 					const originalItemPrice = this.depositItems[
 						`item_${status.data.id}`
