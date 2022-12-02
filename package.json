@@ -9,17 +9,10 @@
         "build": "tsc -p .",
         "build:live": "nodemon"
     },
-    "author": "",
+    "author": "twitter.com/badantal",
     "license": "ISC",
-    "devDependencies": {
-        "@types/node": "^18.11.9",
-        "@types/request-promise": "^4.1.47",
-        "tslint": "^5.12.1",
-        "typescript": "^3.3.3"
-    },
     "dependencies": {
         "axios": "^0.21.1",
-        "cookie": "^0.4.1",
         "dateformat": "^4.3.1",
         "dotenv": "^16.0.3",
         "nodemon": "^2.0.6",
@@ -30,5 +23,10 @@
         "steam-tradeoffer-manager": "^2.10.2",
         "steamcommunity": "^3.42.0",
         "ts-node": "^9.1.1"
+    },
+    "devDependencies": {
+        "@types/node": "^18.11.10",
+        "tslint": "^5.12.1",
+        "typescript": "^3.9.10"
     }
 }
