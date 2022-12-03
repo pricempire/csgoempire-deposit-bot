@@ -121,7 +121,7 @@ export class SteamService {
 					return await this.send(offer);
 				} else {
 					console.log('Offer sent');
-					return resolve();
+					return resolve(true);
 				}
 			});
 		})
