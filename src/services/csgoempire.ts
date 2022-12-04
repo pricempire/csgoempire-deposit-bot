@@ -189,10 +189,10 @@ export class CsgoempireService {
 							break;
 						case "Confirming":
 
-							this.depositItems[`item_${status.data.id}`] = status.data.total_value;
+							this.depositItems[`item_${status.data.id}`] = status.data.total_value || status.data.item.market_value;
 
 							await this.helperService.sendMessage(
-								`Deposit '${itemName}'are confirming for ${status.data.total_value} coins.`,
+								`Deposit '${itemName}' are confirming for ${this.depositItems[`item_${status.data.id}`]} coins.`,
 								"tradeStatusProcessing"
 							);
 							break;
