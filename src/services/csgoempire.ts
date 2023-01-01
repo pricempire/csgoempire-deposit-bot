@@ -6,14 +6,15 @@ const io = require("socket.io-client");
 const open = require("open");
 
 export class CsgoempireService {
+
 	private helperService: HelperService;
 	private steamService: SteamService;
 	private depositItems = {};
 	private sockets = {};
-	private offerSentFor = [];
+	private trackers = {};
+
 	private config: Config;
 	public pricempire;
-	private trackers = {};
 
 	constructor() {
 		this.helperService = new HelperService();
@@ -126,7 +127,6 @@ export class CsgoempireService {
 					"p2p/new-items/subscribe",
 					1
 				);
-				await this.loadDepositItems(userId);
 			}
 		});
 		this.sockets[`user_${userId}`].on("init", (data) => {
@@ -183,42 +183,24 @@ export class CsgoempireService {
 					}
 
 					const itemName = status.data.item.market_name;
-					const itemTotalValue = status.data.item.market_value; // Market value is given in decimals, we need to multiply to be able to compare with originalPrice
-					const itemPrice = itemTotalValue;
-
-					const originalItemPrice = this.depositItems[
-						`item_${status.data.id}`
-					];
-
-					const percent =
-						((itemTotalValue - originalItemPrice) / originalItemPrice) *
-						100 *
-						-1; // We multiply the percentage change by -1 so we can compare it with the threshold set by the user
-
-					// if (
-					// 	!originalItemPrice ||
-					// 	itemTotalValue >= originalItemPrice ||
-					// 	percent <= config.delistThreshold
-					// ) {
 					switch (status.data.status_message) {
 						case "Processing":
-
-							this.depositItems[
-								`item_${status.data.id}`
-							] = itemTotalValue;
 							await this.helperService.sendMessage(
-								`User listed '${itemName}' for ${itemPrice} coins.`,
+								`User listed '${itemName}' for ${status.data.item.market_value} coins.`,
 								"tradeStatusProcessing"
 							);
 							break;
 						case "Confirming":
+
+							this.depositItems[`item_${status.data.id}`] = status.data.total_value || status.data.item.market_value;
+
 							await this.helperService.sendMessage(
-								`Deposit '${itemName}'are confirming for ${itemPrice} coins.`,
+								`Deposit '${itemName}' are confirming for ${this.depositItems[`item_${status.data.id}`]} coins.`,
 								"tradeStatusProcessing"
 							);
 							break;
 						case "Sending":
-							await this.send(status, config, userId, itemName, itemPrice);
+							await this.send(status, config, userId, itemName, this.depositItems[`item_${status.data.id}`]);
 							break;
 
 						case "Sent": {
@@ -228,7 +210,7 @@ export class CsgoempireService {
 						case "Completed":
 							this.clearTracker(status.data.id);
 							await this.helperService.sendMessage(
-								`${itemName} has sold for ${itemPrice}`,
+								`${itemName} has sold for ${this.depositItems[`item_${status.data.id}`]}`,
 								"tradeStatusCompleted"
 							);
 							break;
@@ -247,12 +229,6 @@ export class CsgoempireService {
 							);
 							break;
 					}
-					// } else {
-					// 	await this.helperService.sendMessage(
-					// 		`Dodging item ${itemName} because it's changed in its price in a negative way.`,
-					// 		"tradeStatusDodge"
-					// 	);
-					// }
 				}
 			}
 		);
@@ -260,34 +236,6 @@ export class CsgoempireService {
 		setInterval(() => {
 			this.sockets[`user_${userId}`].emit("timesync");
 		}, 30000);
-	}
-	public async loadDepositItems(userId: number) {
-		const config = this.config.settings.csgoempire.find(
-			(config) => config.userId === userId
-		);
-		const options = await this.getRequestConfig(userId);
-
-		try {
-			const response = (
-				await axios.get(
-					`https://${config.origin}/api/v2/trading/user/trades`,
-					options
-				)
-			).data as DepositResponse;
-			if (response && response.data) {
-				response.data.deposits.forEach((item) => {
-					this.depositItems[`item_${item.id}`] = item.total_value;
-				});
-			}
-			// check if we need to confirm trades
-			return true;
-		} catch (e) {
-			await this.helperService.sendMessage(
-				`Bad response from ${config.origin} at 'loadDepositItems', ${e.message}`,
-				"badResponse"
-			);
-			return false;
-		}
 	}
 	public async requestMetaModel(userId: number) {
 		const config = this.config.settings.csgoempire.find(
