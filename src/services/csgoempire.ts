@@ -11,13 +11,16 @@ export class CsgoempireService {
 	private depositItems = {};
 	private sockets = {};
 	private offerSentFor = [];
-	private config: Config = require("../../config");
+	private config: Config;
 	public pricempire;
 	private trackers = {};
 
 	constructor() {
 		this.helperService = new HelperService();
 		this.steamService = new SteamService();
+
+		this.config = this.helperService.getConfig();
+
 		(async () => {
 			for await (const config of this.config.settings.csgoempire) {
 				this.initSocket(config.userId);

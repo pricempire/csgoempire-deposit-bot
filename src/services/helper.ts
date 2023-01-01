@@ -1,12 +1,13 @@
 import * as util from "util";
 import * as fs from "fs";
 import axios from "axios";
+import path from "path";
 
 const Push = require("pushover-notifications");
 const dateFormat = require("dateformat");
 
 export class HelperService {
-	private config: Config = require("../../config");
+	private config: Config;
 	private log_file;
 	private pushoverClient;
 	public delay = (ms) =>
@@ -67,6 +68,7 @@ export class HelperService {
 		},
 	};
 	constructor() {
+		this.config = this.getConfig();
 		const now = new Date();
 		if (this.config.settings.logging) {
 			if (!fs.existsSync('./logs')) {
@@ -105,6 +107,21 @@ export class HelperService {
 			util.format(d),
 			this.colors.FgWhite
 		);
+	}
+	public getConfig(): Config {
+		if (this.config) {
+			return this.config;
+		}
+
+		if (fs.existsSync(path.resolve(__dirname, '../../config.json'))) {
+			return this.config = require('../../config.json');
+		}
+
+		if (fs.existsSync(path.resolve(__dirname, '../../config.js'))) {
+			return this.config = require('../../config.js');
+		}
+
+		throw new Error("No config file found. Please create a config.js or config.json file and try again.");
 	}
 	async asyncForEach(array, callback, name = "") {
 		for (let index = 0; index < array.length; index++) {

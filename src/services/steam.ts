@@ -8,10 +8,11 @@ export class SteamService {
 	private managers = {};
 	private helperService: HelperService;
 	private steam = new SteamCommunity();
-	private config: Config = require("../../config");
+	private config: Config;
 
 	constructor() {
 		this.helperService = new HelperService();
+		this.config = this.helperService.getConfig();
 		this.init();
 	}
 
