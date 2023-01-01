@@ -1,8 +1,6 @@
 require('dotenv').config();
 
-function env(name, defaultValue = null) {
-	return process.env[name] ?? defaultValue;
-}
+const { HelperService: { env } } = require('./dist/services/helper');
 
 module.exports = {
 	settings: {

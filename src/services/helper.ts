@@ -2,6 +2,7 @@ import * as util from "util";
 import * as fs from "fs";
 import axios from "axios";
 import path from "path";
+import 'dotenv/config';
 
 const Push = require("pushover-notifications");
 const dateFormat = require("dateformat");
@@ -122,6 +123,27 @@ export class HelperService {
 		}
 
 		throw new Error("No config file found. Please create a config.js or config.json file and try again.");
+	}
+	public static env(key: string, defaultValue: string|null = null) {
+		let value = process.env[key];
+	
+		if (value === undefined) {
+			if (defaultValue === null) {
+				throw new Error(`Missing environment variable ${key}`);
+			}
+	
+			return defaultValue;
+		}
+	
+		if (value === 'true') {
+			return true;
+		}
+	
+		if (value === 'false') {
+			return false;
+		}
+	
+		return value;
 	}
 	async asyncForEach(array, callback, name = "") {
 		for (let index = 0; index < array.length; index++) {
