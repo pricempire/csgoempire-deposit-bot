@@ -1,10 +1,9 @@
-require('dotenv').config();
-
 const { HelperService: { env } } = require('./dist/services/helper');
 
 module.exports = {
 	settings: {
 		logging: env('LOGGING', false), // if true, logs are saved to /logs folder.
+		browser: env('BROWSER', 'chrome'), // [chrome, firefox, edge] set your default browser if you using csgotrader offer send
 		discord: {
 			enabled: env('DISCORD_ENABLED', true), // if true, it will use the discordHook for sending messages.
 			userId: env('DISCORD_USER_ID', '12345.......'),
@@ -28,6 +27,7 @@ module.exports = {
 					identitySecret: env('STEAM_IDENTITY_SECRET', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaa='), // Your Steam identitySecret (not necessary)
 					sharedSecret: env('STEAM_SHARED_SECRET', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaa='), // Your Steam sharedSecret (not necessary)
 					acceptOffers: env('STEAM_ACCEPT_OFFERS', true), // Automatically accepts Steam Offers empty from out side
+					proxy: env('STEAM_PROXY', false), // Proxy URL (use https pls)
 				},
 			},
 		],

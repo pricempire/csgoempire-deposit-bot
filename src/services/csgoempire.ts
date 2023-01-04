@@ -9,21 +9,18 @@ export class CsgoempireService {
 
 	private helperService: HelperService;
 	private steamService: SteamService;
-	private depositItems = {};
-	private sockets = {};
-	private trackers = {};
+	private _depositItems = {};
+	private _sockets = {};
+	private _trackers = {};
 
-	private config: Config;
 	public pricempire;
 
 	constructor() {
 		this.helperService = new HelperService();
 		this.steamService = new SteamService();
 
-		this.config = this.helperService.getConfig();
-
 		(async () => {
-			for await (const config of this.config.settings.csgoempire) {
+			for await (const config of this.helperService.config.settings.csgoempire) {
 				this.initSocket(config.userId);
 				await this.helperService.delay(5000);
 			}
@@ -33,7 +30,7 @@ export class CsgoempireService {
 	private async getRequestConfig(
 		userId: number
 	): Promise<AxiosRequestConfig> {
-		const config = this.config.settings.csgoempire.find(
+		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 		return {
@@ -45,7 +42,7 @@ export class CsgoempireService {
 	}
 	private initTracker(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
 		this.helperService.log(`Trade Tracker started for ${status.data.id}`);
-		this.trackers[`track_${status.data.id}`] = setTimeout(async () => {
+		this._trackers[`track_${status.data.id}`] = setTimeout(async () => {
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${status.data.id}, re-sending.`,
 				"tradeStatusCanceled"
@@ -54,8 +51,8 @@ export class CsgoempireService {
 		}, 30 * 60 * 1000);
 	}
 	private clearTracker(id: number) {
-		this.helperService.log(`Trade Tracker cleared for ${id}`);
-		clearTimeout(this.trackers[`track_${id}`]);
+		// this.helperService.log(`Trade Tracker cleared for ${id}`, 1);
+		clearTimeout(this._trackers[`track_${id}`]);
 	}
 	// (status, config, userId, itemName, itemPrice)
 	private async send(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
@@ -67,7 +64,7 @@ export class CsgoempireService {
 		// this.helperService.log(`Tradelink: ${tradeURL}`);
 		// this.helperService.log(`Item: ${itemName}`);
 		if (config.steam && config.steam.accountName) {
-			this.steamService.sendOffer(
+			await this.steamService.sendOffer(
 				status.data.item,
 				tradeURL,
 				userId
@@ -91,10 +88,10 @@ export class CsgoempireService {
 		}
 	}
 	private initSocket(userId) {
-		const config = this.config.settings.csgoempire.find(
+		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
-		this.sockets[`user_${userId}`] = io(`wss://trade.${config.origin}/trade`, {
+		this._sockets[`user_${userId}`] = io(`wss://trade.${config.origin}/trade`, {
 			transports: ["websocket"],
 			path: "/s/",
 			secure: true,
@@ -105,43 +102,41 @@ export class CsgoempireService {
 				"user-agent": `${config.userId} API Bot`,
 			},
 		});
-		this.sockets[`user_${userId}`].on("error", (err, v) => {
+		this._sockets[`user_${userId}`].on("error", (err, v) => {
 			this.helperService.log(`error: ${err}`);
 		});
-		this.sockets[`user_${userId}`].on("connect", async () => {
-			this.sockets[`user_${userId}`].emit('filters', { 'price_max': 9999999 });
+		this._sockets[`user_${userId}`].on("connect", async () => {
+			this._sockets[`user_${userId}`].emit('filters', { 'price_max': 10 }); // set it to 10 to reduce the socket bandwidth
 
 			this.helperService.sendMessage(
-				`Connected to empire.`,
+				`CSGOEmpire Socket connected for user: ${userId}.`,
 				"connectEmpire"
 			);
 			const meta = await this.requestMetaModel(userId);
 			if (meta) {
-				this.sockets[`user_${userId}`].emit("identify", {
+				this._sockets[`user_${userId}`].emit("identify", {
 					uid: meta.user.id,
 					model: meta.user,
 					authorizationToken: meta.socket_token,
 					signature: meta.socket_signature,
 				});
-				this.sockets[`user_${userId}`].emit(
-					"p2p/new-items/subscribe",
-					1
-				);
+				this._sockets[`user_${userId}`].emit("p2p/new-items/subscribe", 1);
 			}
 		});
-		this.sockets[`user_${userId}`].on("init", (data) => {
+		this._sockets[`user_${userId}`].on("init", (data) => {
 			if (data && data.authenticated) {
-				this.helperService.log(
-					`wss://trade.${config.origin}/ authenticated successfully.`,
-					this.helperService.colors.FgGreen
+
+				this.helperService.sendMessage(
+					`CSGOEmpire Socket authenticated successfully for user: ${userId}.`,
+					"connectEmpire"
 				);
 			}
 		});
 
-		this.sockets[`user_${userId}`].on("updated_item", async (payload: P2PNewItem[]) => {
+		this._sockets[`user_${userId}`].on("updated_item", async (payload: P2PNewItem[]) => {
 			const p2pItems = Array.isArray(payload) ? payload : [payload];
 			for await (const item of p2pItems) {
-				const originalItemPrice = this.depositItems[`item_${item.id}`];
+				const originalItemPrice = this._depositItems[`item_${item.id}`];
 				if (originalItemPrice) {
 					const percent =
 						((item.market_value - originalItemPrice) /
@@ -150,9 +145,7 @@ export class CsgoempireService {
 						-1; // We multiply it by -1 to be able to compare it with the threshold set by the user
 					const prefix = percent > 0 ? "-" : "+";
 					this.helperService.sendMessage(
-						`Price changed for ${item.market_name}, ${item.market_value / 100
-						} => ${originalItemPrice / 100} - ${prefix}${percent < 0 ? percent * -1 : percent
-						}%`,
+						`Price changed for ${item.market_name}, ${item.market_value / 100} => ${originalItemPrice / 100} - ${prefix}${percent < 0 ? percent * -1 : percent}%`,
 						"p2pItemUpdatedPriceChanged"
 					);
 					if (percent > config.delistThreshold) {
@@ -164,14 +157,14 @@ export class CsgoempireService {
 						if (!status) return;
 
 						this.helperService.sendMessage(
-							`${item.market_name} Delisted successfully`,
+							`The item '${item.market_name}' was successfully delisted.`,
 							"p2pItemUpdatedDelist"
 						);
 					}
 				}
 			}
 		});
-		this.sockets[`user_${userId}`].on(
+		this._sockets[`user_${userId}`].on(
 			"trade_status",
 			async (payload: TradeStatus[]) => {
 
@@ -192,15 +185,15 @@ export class CsgoempireService {
 							break;
 						case "Confirming":
 
-							this.depositItems[`item_${status.data.id}`] = status.data.total_value || status.data.item.market_value;
+							this._depositItems[`item_${status.data.id}`] = status.data.total_value || status.data.item.market_value;
 
 							await this.helperService.sendMessage(
-								`Deposit '${itemName}' are confirming for ${this.depositItems[`item_${status.data.id}`]} coins.`,
+								`Deposit '${itemName}' are confirming for ${this._depositItems[`item_${status.data.id}`] / 100} coins.`,
 								"tradeStatusProcessing"
 							);
 							break;
 						case "Sending":
-							await this.send(status, config, userId, itemName, this.depositItems[`item_${status.data.id}`]);
+							await this.send(status, config, userId, itemName, this._depositItems[`item_${status.data.id}`]);
 							break;
 
 						case "Sent": {
@@ -210,7 +203,7 @@ export class CsgoempireService {
 						case "Completed":
 							this.clearTracker(status.data.id);
 							await this.helperService.sendMessage(
-								`${itemName} has sold for ${this.depositItems[`item_${status.data.id}`]}`,
+								`${itemName} has sold for ${this._depositItems[`item_${status.data.id}`] / 100}`,
 								"tradeStatusCompleted"
 							);
 							break;
@@ -234,11 +227,11 @@ export class CsgoempireService {
 		);
 
 		setInterval(() => {
-			this.sockets[`user_${userId}`].emit("timesync");
+			this._sockets[`user_${userId}`].emit("timesync");
 		}, 30000);
 	}
 	public async requestMetaModel(userId: number) {
-		const config = this.config.settings.csgoempire.find(
+		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 		const options = await this.getRequestConfig(userId);
@@ -250,13 +243,11 @@ export class CsgoempireService {
 				)
 			).data as MetaResponse;
 		} catch (e) {
-			this.helperService.log(
-				`Bad response from ${config.origin} at 'requestMetaModel'`
-			);
+			this.helperService.log(`Bad response from ${config.origin} at 'requestMetaModel'. Maybe CSGOEmpire down, or you are using a bad CSGOEmpire API Key.`, 2);
 		}
 	}
 	public async getUserInventory(userId: number) {
-		const config = this.config.settings.csgoempire.find(
+		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 		const options = await this.getRequestConfig(userId);
@@ -276,7 +267,7 @@ export class CsgoempireService {
 		}
 	}
 	public async delistItem(userId, botId) {
-		const config = this.config.settings.csgoempire.find(
+		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 		const options = await this.getRequestConfig(userId);
@@ -298,7 +289,7 @@ export class CsgoempireService {
 		}
 	}
 	public async confirmTrade(userId, depositId) {
-		const config = this.config.settings.csgoempire.find(
+		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 		const options = await this.getRequestConfig(userId);

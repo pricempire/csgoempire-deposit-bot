@@ -3,25 +3,33 @@ import { HelperService } from "./helper";
 const SteamCommunity = require("steamcommunity");
 const TradeOfferManager = require("steam-tradeoffer-manager");
 const SteamTotp = require("steam-totp");
+const Request = require('request');
 
 export class SteamService {
 	private managers = {};
+	private steams = {};
 	private helperService: HelperService;
-	private steam = new SteamCommunity();
-	private config: Config;
 
 	constructor() {
 		this.helperService = new HelperService();
-		this.config = this.helperService.getConfig();
 		this.init();
 	}
 
 	async init() {
-		for await (const config of this.config.settings.csgoempire) {
+		for await (const config of this.helperService.config.settings.csgoempire) {
 
 			if (config.steam.accountName) {
 				try {
-					const cookies = await this.login(config.steam);
+					let initObject = {};
+					if (config.steam.proxy) {
+						initObject = {
+							'request': Request.defaults({ 'proxy': config.steam.proxy }),
+						}
+					}
+					this.steams[config.steam.accountName] = new SteamCommunity(initObject);
+
+					await this.login(config.steam);
+
 					this.helperService.sendMessage(
 						`Steam login success for ${config.steam.accountName}`,
 						"steamLoginSuccess"
@@ -33,9 +41,10 @@ export class SteamService {
 						language: "en",
 						pollInterval: 120000,
 						// cancelTime: 9 * 60 * 1000, // cancel outgoing offers after 9mins
-						community: this.steam,
+						community: this.steams[config.steam.accountName],
 					});
 
+					/*
 					this.managers[config.steam.accountName].setCookies(
 						cookies,
 						function (err) {
@@ -45,8 +54,9 @@ export class SteamService {
 							}
 						}
 					);
+					*/
 
-					this.steam.on('sessionExpired', async () => {
+					this.steams[config.steam.accountName].on('sessionExpired', async () => {
 						this.helperService.sendMessage(
 							`Steam session expired for ${config.steam.accountName}`,
 							"steamSessionExpired"
@@ -92,43 +102,44 @@ export class SteamService {
 			}
 		}
 	}
-	async steamGuardConfirmation(offer, identitySecret) {
-		this.steam.acceptConfirmationForObject(
-			identitySecret,
-			offer.id,
-			(err: Error | null) => {
-				if (err) {
-					setTimeout(async () => {
-						await this.steamGuardConfirmation(
-							offer,
-							identitySecret
-						);
-					}, 5000); // Try to send the offer every 5 seconds, when there's no success
-				} else {
-					this.helperService.sendMessage(
-						`Deposit item sent & confirmed`,
-						"steamOfferConfirmed"
-					);
+	async steamGuardConfirmation(steam: Steam, offer: any) {
+		return new Promise((resolve, reject) => {
+			this.steams[steam.accountName].acceptConfirmationForObject(
+				steam.identitySecret,
+				offer.id,
+				(err: Error | null) => {
+					if (err) {
+						if (offer.isGlitched()) {
+							this.helperService.log(`[#${offer.id}] Offer is glitched. (Empty from both side)`, 2);
+						}
+						this.helperService.log(`[#${offer.id}] Failed to Confirm the offer, retry in 5 seconds.`, 2);
+						setTimeout(async () => {
+							resolve(await this.steamGuardConfirmation(
+								offer,
+								steam.identitySecret
+							));
+						}, 30000); // Increased this in case of Steam is down, do not spam the endpoint and get ratelimited.
+					}
+					resolve(offer);
 				}
-			}
-		);
+			);
+		})
 	}
 	async send(offer) {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
-					console.log('Sending failed, resend it in 10 seconds.');
+					this.helperService.log('The sending process was unsuccessful. Trying again in 10 seconds.', 2);
 					await this.helperService.delay(1e4);
-					return await this.send(offer);
+					resolve(await this.send(offer));
 				} else {
-					console.log('Offer sent');
-					return resolve(true);
+					resolve(offer.id);
 				}
 			});
-		})
+		});
 	}
 	async sendOffer(sendItem, tradeURL: string, userId: number) {
-		const config = this.config.settings.csgoempire.find(
+		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 		const items = [];
@@ -142,25 +153,30 @@ export class SteamService {
 		);
 		offer.addMyItems(items);
 		try {
-			await this.send(offer);
-
-			// Wait 10 seconds to prevent offer id being null and breaking Steam Guard Confirmation
-			await this.helperService.delay(1e4);
-			await this.steamGuardConfirmation(
-				offer,
-				config.steam.identitySecret
-			);
+			const offerId = await this.send(offer);
+			this.helperService.log(`[#${offerId}] Offer created for ${sendItem.market_name}`, 1);
 		} catch (e) {
-			console.log('Error in steam sending', e);
+			this.helperService.log(`Failed to create the Steam offer. Assetid: #${sendItem.market_name}`, 2);
 		}
+
+		await this.helperService.delay(1e4);
+
+		try {
+			await this.steamGuardConfirmation(
+				config.steam,
+				offer,
+			);
+			this.helperService.log(`[#${offer.id}] Offer Confirmed for ${sendItem.market_name}`, 1);
+		} catch (e) { }
+
 	}
-	async login(config: Steam) {
+	async login(steam: Steam) {
 		return new Promise((resolve, reject) => {
-			this.steam.login(
+			this.steams[steam.accountName].login(
 				{
-					accountName: config.accountName,
-					password: config.password,
-					twoFactorCode: SteamTotp.getAuthCode(config.sharedSecret),
+					accountName: steam.accountName,
+					password: steam.password,
+					twoFactorCode: SteamTotp.getAuthCode(steam.sharedSecret),
 				},
 				function (err, sessionID, cookies, steamguard) {
 					if (err) {

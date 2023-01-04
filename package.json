@@ -1,32 +1,32 @@
 {
-    "name": "csgoempire-deposit-v2",
-    "version": "1.0.0",
-    "description": "",
-    "main": "dist/main.js",
-    "scripts": {
-        "start": "npm run build:live",
-        "start:dev": "nodemon",
-        "build": "tsc -p .",
-        "build:live": "nodemon"
-    },
-    "author": "twitter.com/badantal",
-    "license": "ISC",
-    "dependencies": {
-        "axios": "^0.21.1",
-        "dateformat": "^4.3.1",
-        "dotenv": "^16.0.3",
-        "nodemon": "^2.0.6",
-        "open": "^7.3.0",
-        "pushover-notifications": "^1.2.2",
-        "socket.io-client": "2.0.3",
-        "steam-totp": "^2.1.1",
-        "steam-tradeoffer-manager": "^2.10.2",
-        "steamcommunity": "^3.42.0",
-        "ts-node": "^9.1.1"
-    },
-    "devDependencies": {
-        "@types/node": "^18.11.10",
-        "tslint": "^5.12.1",
-        "typescript": "^3.9.10"
-    }
+	"name": "csgoempire-deposit-v2",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/main.js",
+	"scripts": {
+		"start": "npm run build:live",
+		"start:dev": "nodemon",
+		"build": "tsc -p .",
+		"build:live": "nodemon"
+	},
+	"author": "twitter.com/badantal",
+	"license": "ISC",
+	"dependencies": {
+		"axios": "^0.21.1",
+		"dateformat": "^4.3.1",
+		"dotenv": "^16.0.3",
+		"nodemon": "^2.0.6",
+		"open": "^7.3.0",
+		"pushover-notifications": "^1.2.2",
+		"socket.io-client": "2.0.3",
+		"steam-totp": "^2.1.1",
+		"steam-tradeoffer-manager": "^2.10.2",
+		"steamcommunity": "^3.42.0",
+		"ts-node": "^9.1.1"
+	},
+	"devDependencies": {
+		"@types/node": "^18.11.10",
+		"tslint": "^5.12.1",
+		"typescript": "^3.9.10"
+	}
 }

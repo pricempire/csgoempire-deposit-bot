@@ -1,150 +1,98 @@
-import * as util from "util";
 import * as fs from "fs";
 import axios from "axios";
 import path from "path";
-import 'dotenv/config';
 
 const Push = require("pushover-notifications");
 const dateFormat = require("dateformat");
 
 export class HelperService {
-	private config: Config;
-	private log_file;
-	private pushoverClient;
-	public delay = (ms) =>
-		new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
 
-	public colors = {
-		FgBlack: "\x1b[30m",
-		FgRed: "\x1b[31m",
-		FgGreen: "\x1b[32m",
-		FgYellow: "\x1b[33m",
-		FgBlue: "\x1b[34m",
-		FgMagenta: "\x1b[35m",
-		FgCyan: "\x1b[36m",
-		FgWhite: "\x1b[37m",
+	public static _log_file;
+
+	private _config: Config;
+	private pushoverClient;
+	private eventColors = {
+		steamLoginSuccess: 1,
+		steamLoginFailed: 2,
+		connectEmpire: 1,
+		p2pItemUpdatedDelist: 1,
+		p2pItemUpdatedPriceChanged: 1,
+		tradeStatusSending: 1,
+		tradeStatusCompleted: 1,
+		tradeStatusTimedOut: 2,
+		tradeStatusDodge: 2,
+		tradeStatusProcessing: 1,
+		tradeStatusCanceled: 2,
+		steamOfferConfirmed: 1,
+		steamSessionExpired: 2,
+		badResponse: 2
 	};
-	private events = {
-		steamLoginSuccess: {
-			color: this.colors.FgGreen,
-		},
-		steamLoginFailed: {
-			color: this.colors.FgRed,
-		},
-		connectEmpire: {
-			color: this.colors.FgGreen,
-		},
-		p2pItemUpdatedDelist: {
-			color: this.colors.FgGreen,
-		},
-		p2pItemUpdatedPriceChanged: {
-			color: this.colors.FgGreen,
-		},
-		tradeStatusSending: {
-			color: this.colors.FgGreen,
-		},
-		tradeStatusCompleted: {
-			color: this.colors.FgGreen,
-		},
-		tradeStatusTimedOut: {
-			color: this.colors.FgRed,
-		},
-		tradeStatusDodge: {
-			color: this.colors.FgRed,
-		},
-		tradeStatusProcessing: {
-			color: this.colors.FgGreen,
-		},
-		tradeStatusCanceled: {
-			color: this.colors.FgRed
-		},
-		steamOfferConfirmed: {
-			color: this.colors.FgGreen,
-		},
-		steamSessionExpired: {
-			color: this.colors.FgRed,
-		},
-		badResponse: {
-			color: this.colors.FgRed,
-		},
-	};
+	public colors = [37, 32, 31]; // white, green ,red
+
 	constructor() {
-		this.config = this.getConfig();
-		const now = new Date();
-		if (this.config.settings.logging) {
-			if (!fs.existsSync('./logs')) {
-				fs.mkdirSync('./logs');
-			}
-			this.log_file = fs.createWriteStream(
-				__dirname +
-				"/logs/debug." +
-				dateFormat(now, "yyyy_mm_dd_H_MM_ss.l") +
-				".log",
-				{ flags: "w" }
-			);
-		}
 		if (this.config.settings.pushover.enabled) {
 			this.pushoverClient = new Push({
 				user: this.config.settings.pushover.pushoverUser,
 				token: this.config.settings.pushover.pushoverToken,
 			});
 		}
-	}
-	public log(d, color = "\x1b[0m") {
-		if (this.config.settings.logging) {
-			this.log_file.write(
-				"[" +
-				dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l") +
-				"] " +
-				util.format(d) +
-				"\n"
-			);
+
+		if (!this.config.settings.logging) {
+			return;
 		}
-		console.log(
-			color +
-			"[" +
-			dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l") +
-			"] " +
-			util.format(d),
-			this.colors.FgWhite
-		);
+
+		if (!fs.existsSync('./logs')) {
+			fs.mkdirSync('./logs');
+		}
+
+		if (!HelperService._log_file) {
+			HelperService._log_file = fs.createWriteStream(`${__dirname}/../../logs/debug.${dateFormat(new Date(), "yyyy_mm_dd_H_MM_ss.l")}.log`, { flags: "w" });
+		}
 	}
-	public getConfig(): Config {
-		if (this.config) {
-			return this.config;
+	public log(d, level = 0) {
+
+		console.log(`\x1b[${this.colors[level]}m [${dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l")}] ${d} \x1b[${this.colors[0]}m`);
+
+		HelperService._log_file.write(`[${dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l")}]${d}\n`);
+	}
+	public get config(): Config {
+		if (this._config) {
+			return this._config;
 		}
 
 		if (fs.existsSync(path.resolve(__dirname, '../../config.json'))) {
-			return this.config = require('../../config.json');
+			return this._config = require('../../config.json');
 		}
 
 		if (fs.existsSync(path.resolve(__dirname, '../../config.js'))) {
-			return this.config = require('../../config.js');
+			return this._config = require('../../config.js');
 		}
 
 		throw new Error("No config file found. Please create a config.js or config.json file and try again.");
 	}
-	public static env(key: string, defaultValue: string|null = null) {
+	public static env(key: string, defaultValue: string | null = null) {
 		let value = process.env[key];
-	
+
 		if (value === undefined) {
 			if (defaultValue === null) {
 				throw new Error(`Missing environment variable ${key}`);
 			}
-	
+
 			return defaultValue;
 		}
-	
+
 		if (value === 'true') {
 			return true;
 		}
-	
+
 		if (value === 'false') {
 			return false;
 		}
-	
+
 		return value;
 	}
+	public delay = (ms) => new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
+
 	async asyncForEach(array, callback, name = "") {
 		for (let index = 0; index < array.length; index++) {
 			await callback(array[index], index, array, name);
@@ -154,7 +102,7 @@ export class HelperService {
 		if (this.config.notifications[event]) {
 			await this.sendDiscord(message);
 			await this.sendPushover(message);
-			this.log(message, this.events[event].color);
+			this.log(message, this.eventColors[event]);
 		}
 	}
 	private async sendPushover(msg) {
