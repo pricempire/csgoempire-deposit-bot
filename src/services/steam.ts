@@ -63,16 +63,11 @@ export class SteamService {
 						);
 
 						// Sign back in
-						let cookies = await this.login(config.steam);
+						await this.login(config.steam);
 
-						this.managers[config.steam.accountName].setCookies(
-							cookies,
-							function (err) {
-								if (err) {
-									console.log(err);
-									return;
-								}
-							}
+						this.helperService.sendMessage(
+							`Steam login success for ${config.steam.accountName}`,
+							"steamLoginSuccess"
 						);
 					});
 
