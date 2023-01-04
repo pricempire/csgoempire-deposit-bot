@@ -1,7 +1,8 @@
-config.backup.json
 node_modules
 dist/*
 yarn.lock
+logs/*
 
 .env
+config.json
 package-lock.json

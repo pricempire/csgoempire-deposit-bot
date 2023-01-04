@@ -1,10 +1,7 @@
-import { BotService } from "./services/bot";
+import { CsgoempireService } from "./services/csgoempire";
+import { HelperService } from "./services/helper";
 
-async function bootstrap() {
-	// start the bot
-	const bot = new BotService();
-	setInterval(() => {
-		//
-	}, 60000);
-}
-bootstrap();
+require('dotenv').config();
+
+new CsgoempireService();
+new HelperService();
