@@ -19,9 +19,9 @@
 		"open": "^7.3.0",
 		"pushover-notifications": "^1.2.2",
 		"socket.io-client": "2.0.3",
-		"steam-totp": "^2.1.1",
-		"steam-tradeoffer-manager": "^2.10.2",
-		"steamcommunity": "^3.42.0",
+		"steam-totp": "^2.1.2",
+		"steam-tradeoffer-manager": "^2.10.5",
+		"steamcommunity": "^3.44.3",
 		"ts-node": "^9.1.1"
 	},
 	"devDependencies": {
