@@ -13,12 +13,15 @@ export class CsgoempireService {
 	private sockets = {};
 	private trackers = {};
 
-	private config: Config = require("../../config.json");
+	private config: Config;
 	public pricempire;
 
 	constructor() {
 		this.helperService = new HelperService();
 		this.steamService = new SteamService();
+
+		this.config = this.helperService.getConfig();
+
 		(async () => {
 			for await (const config of this.config.settings.csgoempire) {
 				this.initSocket(config.userId);

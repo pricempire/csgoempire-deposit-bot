@@ -1,12 +1,14 @@
 import * as util from "util";
 import * as fs from "fs";
 import axios from "axios";
+import path from "path";
+import 'dotenv/config';
 
 const Push = require("pushover-notifications");
 const dateFormat = require("dateformat");
 
 export class HelperService {
-	private config: Config = require("../../config.json");
+	private config: Config;
 	private log_file;
 	private pushoverClient;
 	public delay = (ms) =>
@@ -67,6 +69,7 @@ export class HelperService {
 		},
 	};
 	constructor() {
+		this.config = this.getConfig();
 		const now = new Date();
 		if (this.config.settings.logging) {
 			if (!fs.existsSync('./logs')) {
@@ -105,6 +108,42 @@ export class HelperService {
 			util.format(d),
 			this.colors.FgWhite
 		);
+	}
+	public getConfig(): Config {
+		if (this.config) {
+			return this.config;
+		}
+
+		if (fs.existsSync(path.resolve(__dirname, '../../config.json'))) {
+			return this.config = require('../../config.json');
+		}
+
+		if (fs.existsSync(path.resolve(__dirname, '../../config.js'))) {
+			return this.config = require('../../config.js');
+		}
+
+		throw new Error("No config file found. Please create a config.js or config.json file and try again.");
+	}
+	public static env(key: string, defaultValue: string|null = null) {
+		let value = process.env[key];
+	
+		if (value === undefined) {
+			if (defaultValue === null) {
+				throw new Error(`Missing environment variable ${key}`);
+			}
+	
+			return defaultValue;
+		}
+	
+		if (value === 'true') {
+			return true;
+		}
+	
+		if (value === 'false') {
+			return false;
+		}
+	
+		return value;
 	}
 	async asyncForEach(array, callback, name = "") {
 		for (let index = 0; index < array.length; index++) {
