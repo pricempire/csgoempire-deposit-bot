@@ -6,9 +6,9 @@
 
 # Special thanks, much love to
 
--   Artemis
--   Pixel
--   Tavin
+-   [@Artemis]( https://github.com/Art-em1s )
+-   [@Pixel]( https://github.com/PixelBoii )
+-   [@Tavin]( https://github.com/tavindev )
 
 You can configure the bot as you want.
 
