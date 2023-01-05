@@ -53,7 +53,7 @@ export class HelperService {
 
 		console.log(`\x1b[${this.colors[level]}m [${dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l")}] ${d} \x1b[${this.colors[0]}m`);
 
-		if (!this.config.settings.logging) {
+		if (this.config.settings.logging) {
 			HelperService._log_file.write(`[${dateFormat(new Date(), "yyyy-mm-dd H:MM:ss.l")}]${d}\n`);
 		}
 	}
