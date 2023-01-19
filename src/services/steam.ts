@@ -28,12 +28,13 @@ export class SteamService {
 					}
 					this.steams[config.steam.accountName] = new SteamCommunity(initObject);
 
-					await this.login(config.steam);
+					const cookies = await this.login(config.steam);
 
 					this.helperService.sendMessage(
 						`Steam login success for ${config.steam.accountName}`,
 						"steamLoginSuccess"
 					);
+
 					this.managers[
 						config.steam.accountName
 					] = new TradeOfferManager({
@@ -44,7 +45,6 @@ export class SteamService {
 						community: this.steams[config.steam.accountName],
 					});
 
-					/*
 					this.managers[config.steam.accountName].setCookies(
 						cookies,
 						function (err) {
@@ -54,7 +54,6 @@ export class SteamService {
 							}
 						}
 					);
-					*/
 
 					this.steams[config.steam.accountName].on('sessionExpired', async () => {
 						this.helperService.sendMessage(
@@ -63,7 +62,17 @@ export class SteamService {
 						);
 
 						// Sign back in
-						await this.login(config.steam);
+						const cookies = await this.login(config.steam);
+
+						this.managers[config.steam.accountName].setCookies(
+							cookies,
+							function (err) {
+								if (err) {
+									console.log(err);
+									return;
+								}
+							}
+						);
 
 						this.helperService.sendMessage(
 							`Steam login success for ${config.steam.accountName}`,
