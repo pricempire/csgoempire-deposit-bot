@@ -21,91 +21,97 @@ export class SteamService {
 		for await (const config of this.helperService.config.settings.csgoempire) {
 
 			if (config.steam.accountName) {
-				try {
-					let initObject = {};
-					if (config.steam.proxy) {
-						initObject = {
-							'request': Request.defaults({ 'proxy': config.steam.proxy }),
-						}
-					}
-					this.steams[config.steam.accountName] = new SteamCommunity(initObject);
-
-					const cookies = await this.login(config.steam);
-
-					this.helperService.sendMessage(
-						`Steam login success for ${config.steam.accountName}`,
-						"steamLoginSuccess"
-					);
-
-					this.managers[
-						config.steam.accountName
-					] = new TradeOfferManager({
-						domain: "localhost",
-						language: "en",
-						pollInterval: 120000,
-						// cancelTime: 9 * 60 * 1000, // cancel outgoing offers after 9mins
-						community: this.steams[config.steam.accountName],
-					});
-
-					this.managers[config.steam.accountName].setCookies(
-						cookies,
-						function (err) {
-							if (err) {
-								console.log(err);
-								return;
-							}
-						}
-					);
-
-					this.steams[config.steam.accountName].on('sessionExpired', async () => {
-						this.helperService.sendMessage(
-							`Steam session expired for ${config.steam.accountName}`,
-							"steamSessionExpired"
-						);
-
-						// Sign back in
-						const cookies = await this.login(config.steam);
-
-						this.managers[config.steam.accountName].setCookies(
-							cookies,
-							function (err) {
-								if (err) {
-									console.log(err);
-									return;
-								}
-							}
-						);
-
-						this.helperService.sendMessage(
-							`Steam login success for ${config.steam.accountName}`,
-							"steamLoginSuccess"
-						);
-					});
-
-					if (config.steam.acceptOffers) {
-						// Accepts all offers empty from our side
-						this.managers[config.steam.accountName].on(
-							"newOffer",
-							(offer) => {
-								if (
-									offer.itemsToGive.length > 0 &&
-									!offer.isOurOffer
-								) {
-									// offer.decline();
-								} else {
-									offer.accept();
-								}
-							}
-						);
-					}
-				} catch (err) {
-					this.helperService.sendMessage(
-						`Steam login fail for ${config.steam.accountName}: ${err.message}`,
-						"steamLoginFailed"
-					);
-				}
+				await this.initLogin(config);
 				await this.helperService.delay(10000);
 			}
+		}
+	}
+	async initLogin(config) {
+		try {
+			let initObject = {};
+			if (config.steam.proxy) {
+				initObject = {
+					'request': Request.defaults({ 'proxy': config.steam.proxy }),
+				}
+			}
+			this.steams[config.steam.accountName] = new SteamCommunity(initObject);
+
+			const cookies = await this.login(config.steam);
+
+			this.helperService.sendMessage(
+				`Steam login success for ${config.steam.accountName}`,
+				"steamLoginSuccess"
+			);
+
+			this.managers[
+				config.steam.accountName
+			] = new TradeOfferManager({
+				domain: "localhost",
+				language: "en",
+				pollInterval: 120000,
+				// cancelTime: 9 * 60 * 1000, // cancel outgoing offers after 9mins
+				community: this.steams[config.steam.accountName],
+			});
+
+			this.managers[config.steam.accountName].setCookies(
+				cookies,
+				function (err) {
+					if (err) {
+						console.log(err);
+						return;
+					}
+				}
+			);
+
+			this.steams[config.steam.accountName].on('sessionExpired', async () => {
+				this.helperService.sendMessage(
+					`Steam session expired for ${config.steam.accountName}`,
+					"steamSessionExpired"
+				);
+
+				// Sign back in
+				const cookies = await this.login(config.steam);
+
+				this.managers[config.steam.accountName].setCookies(
+					cookies,
+					function (err) {
+						if (err) {
+							console.log(err);
+							return;
+						}
+					}
+				);
+
+				this.helperService.sendMessage(
+					`Steam login success for ${config.steam.accountName}`,
+					"steamLoginSuccess"
+				);
+			});
+
+			if (config.steam.acceptOffers) {
+				// Accepts all offers empty from our side
+				this.managers[config.steam.accountName].on(
+					"newOffer",
+					(offer) => {
+						if (
+							offer.itemsToGive.length > 0 &&
+							!offer.isOurOffer
+						) {
+							// offer.decline();
+						} else {
+							offer.accept();
+						}
+					}
+				);
+			}
+		} catch (err) {
+			this.helperService.sendMessage(
+				`Steam login failed for ${config.steam.accountName}: ${err.message}`,
+				"steamLoginFailed"
+			);
+
+			await this.helperService.delay(10000);
+			return await this.initLogin(config);
 		}
 	}
 	async steamGuardConfirmation(steam: Steam, offer: any) {
