@@ -110,7 +110,7 @@ export class SteamService {
 				"steamLoginFailed"
 			);
 
-			await this.helperService.delay(10000);
+			await this.helperService.delay(60000); // 60s because of steam guard
 			return await this.initLogin(config);
 		}
 	}
