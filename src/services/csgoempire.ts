@@ -7,6 +7,10 @@ const open = require("open");
 
 export class CsgoempireService {
 
+	private readonly maxRetry = 5;
+
+	private retries = {};
+
 	private helperService: HelperService;
 	private steamService: SteamService;
 	private _depositItems = {};
@@ -43,6 +47,18 @@ export class CsgoempireService {
 	private initTracker(status: TradeStatus, config: any, userId: any, itemName: string, itemPrice: number) {
 		this.helperService.log(`Trade Tracker started for ${status.data.id}`);
 		this._trackers[`track_${status.data.id}`] = setTimeout(async () => {
+			if (!this.retries[status.data.id]) {
+				this.retries[status.data.id] = 0;
+			}
+			this.retries[status.data.id]++;
+			if (this.retries[status.data.id] > this.maxRetry) {
+
+				this.helperService.sendMessage(
+					`Failed to send offer for ${status.data.id} after ${this.maxRetry} retry, aborting.`,
+					"tradeStatusCanceled"
+				);
+				return;
+			}
 			this.helperService.sendMessage(
 				`Trade offer still not sent for ${status.data.id}, re-sending.`,
 				"tradeStatusCanceled"
