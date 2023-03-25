@@ -107,26 +107,32 @@ export class SteamService {
 		}
 	}
 	async steamGuardConfirmation(steam: Steam, offer: any) {
-		return new Promise((resolve, reject) => {
-			this.steams[steam.accountName].acceptConfirmationForObject(
-				steam.identitySecret,
-				offer.id,
-				(err: Error | null) => {
-					if (err) {
-						if (offer.isGlitched()) {
-							this.helperService.log(`[#${offer.id}] Offer is glitched. (Empty from both side)`, 2);
+		return new Promise(async (resolve, reject) => {
+			try {
+				this.steams[steam.accountName].acceptConfirmationForObject(
+					steam.identitySecret,
+					offer.id,
+					(err: Error | null) => {
+						if (err) {
+							if (offer.isGlitched()) {
+								this.helperService.log(`[#${offer.id}] Offer is glitched. (Empty from both side)`, 2);
+							}
+							this.helperService.log(`[#${offer.id}] Failed to Confirm the offer, retry in 5 seconds.`, 2);
+							setTimeout(async () => {
+								resolve(await this.steamGuardConfirmation(
+									offer,
+									steam.identitySecret
+								));
+							}, 30000); // Increased this in case of Steam is down, do not spam the endpoint and get ratelimited.
 						}
-						this.helperService.log(`[#${offer.id}] Failed to Confirm the offer, retry in 5 seconds.`, 2);
-						setTimeout(async () => {
-							resolve(await this.steamGuardConfirmation(
-								offer,
-								steam.identitySecret
-							));
-						}, 30000); // Increased this in case of Steam is down, do not spam the endpoint and get ratelimited.
+						resolve(offer);
 					}
-					resolve(offer);
-				}
-			);
+				);
+			} catch (e) {
+				await this.helperService.delay(20000);
+				await this.login(steam);
+				return this.steamGuardConfirmation(steam, offer);
+			}
 		})
 	}
 	async send(offer) {
