@@ -6,6 +6,8 @@ const SteamTotp = require("steam-totp");
 const Request = require('request');
 
 export class SteamService {
+	private readonly maxRetry = 5;
+	private retries = {};
 	private managers = {};
 	private steams = {};
 	private helperService: HelperService;
@@ -139,7 +141,16 @@ export class SteamService {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
-					this.helperService.log('The sending process was unsuccessful. Trying again in 10 seconds.', 2);
+					if (!this.retries[offer.items[0].assetid]) {
+						this.retries[offer.items[0].assetid] = 1;
+					}
+					this.retries[offer.items[0].assetid]++;
+
+					if (this.retries[offer.items[0].assetid] > this.maxRetry) {
+						this.helperService.log('The sending process was unsuccessful after 5 retries, Probably item id changed.', 2);
+						reject();
+					}
+					this.helperService.log('The sending process was unsuccessful. Try again in 10 seconds.', 2);
 					await this.helperService.delay(1e4);
 					resolve(await this.send(offer));
 				} else {
@@ -166,7 +177,7 @@ export class SteamService {
 			const offerId = await this.send(offer);
 			this.helperService.log(`[#${offerId}] Offer created for ${sendItem.market_name}`, 1);
 		} catch (e) {
-			this.helperService.log(`Failed to create the Steam offer. Assetid: #${sendItem.market_name}`, 2);
+			this.helperService.log(`Failed to create the Steam offer. ${sendItem.market_name}#${sendItem.asset_id}`, 2);
 		}
 
 		await this.helperService.delay(1e4);
