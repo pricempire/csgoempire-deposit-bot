@@ -95,7 +95,7 @@ export class CsgoempireService {
 			);
 			await open(
 				`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
-				{ app: config.browser }
+				{ app: config.browser || "chrome" }
 			);
 			this.initTracker(status, config, userId, itemName, itemPrice);
 		} else {
