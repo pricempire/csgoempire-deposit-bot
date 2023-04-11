@@ -21,6 +21,7 @@ module.exports = {
 				csgoempireApiKey: env('CSGOEMPIRE_API_KEY', '12345678923456789234567'), // https://csgoempire.com/trading/apikey
 				csgotrader: env('CSGOTRADER', false), // set true if you using Gery's chrome extension, to autosend the offers
 				delistThreshold: env('DELIST_THRESHOLD', 5), // The percentage to delist the item if its drop in price.
+				stuckTradesPollRate: env('CSGOEMPIRE_POLL_RATE', 5), // How often to check for stuck trades. IN MINUTES
 				steam: {
 					accountName: env('STEAM_ACCOUNT_NAME', false), // Your Steam username (not necessary), set false to disable steam
 					password: env('STEAM_PASSWORD', 'aaaaaaaaaaaaaa'), // Your Steam password (not necessary)

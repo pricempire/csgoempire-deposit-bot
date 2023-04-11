@@ -14,6 +14,12 @@ export class HelperService {
 	private eventColors = {
 		steamLoginSuccess: 1,
 		steamLoginFailed: 2,
+		steamWebSession: 1,
+		steamManagerSetCookiesFailed: 2,
+		steamManagerSetCookiesSuccess: 1,
+		steamClientError: 2,
+		steamDisconnected: 2,
+		steamAccountLimitations: 1,
 		connectEmpire: 1,
 		p2pItemUpdatedDelist: 1,
 		p2pItemUpdatedPriceChanged: 1,

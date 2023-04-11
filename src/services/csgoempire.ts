@@ -107,6 +107,10 @@ export class CsgoempireService {
 	}
 	private initDepositPoller(userId) {
 		this.helperService.log(`Deposit Poller started for ${userId}`);
+		const config = this.helperService.config.settings.csgoempire.find(
+			(config) => config.userId === userId
+		);
+
 		this._depositPollers[`poll_${userId}`] = setInterval(async () => {
 			this.helperService.log(`Polling for ${userId} stuck deposits`);
 			const responseData = await this.getActiveTrades(userId);
@@ -117,9 +121,6 @@ export class CsgoempireService {
 				(trade) => trade.status === 3 // 3 = sending
 			);
 			this.helperService.log(`Found ${tradesToBeSent.length} stuck deposits for ${userId}`);
-			const config = this.helperService.config.settings.csgoempire.find(
-				(config) => config.userId === userId
-			);
 
 			// send the trades
 			for await(const trade of tradesToBeSent){
@@ -141,7 +142,7 @@ export class CsgoempireService {
 			}
 
 			return this.helperService.log(`Deposit Poller finished for ${userId}`);
-		}, 5 * 60 * 1000); // 5 minutes
+		}, (config.stuckTradesPollRate || 5) * (60 * 1000)); // default is 5 minutes
 	}
 	private initSocket(userId) {
 		const config = this.helperService.config.settings.csgoempire.find(
@@ -159,7 +160,7 @@ export class CsgoempireService {
 			},
 		});
 		this._sockets[`user_${userId}`].on("error", (err, v) => {
-			this.helperService.log(`error: ${err}`);
+			this.helperService.log(`Websocket Error: ${err}`);
 		});
 		this._sockets[`user_${userId}`].on("connect", async () => {
 			this._sockets[`user_${userId}`].emit('filters', { 'price_max': 10 }); // set it to 10 to reduce the socket bandwidth
