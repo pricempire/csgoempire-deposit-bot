@@ -2,10 +2,10 @@ const { HelperService: { env } } = require('./dist/services/helper');
 
 module.exports = {
 	settings: {
-		logging: env('LOGGING', true), // if true, logs are saved to /logs folder.
-		browser: env('BROWSER', 'brave'), // [chrome, firefox, edge] set your default browser if you using csgotrader offer send
+		logging: env('LOGGING', false), // if true, logs are saved to /logs folder.
+		browser: env('BROWSER', 'chrome'), // [chrome, firefox, edge] set your default browser if you using csgotrader offer send
 		discord: {
-			enabled: env('DISCORD_ENABLED', false), // if true, it will use the discordHook for sending messages.
+			enabled: env('DISCORD_ENABLED', true), // if true, it will use the discordHook for sending messages.
 			userId: env('DISCORD_USER_ID', '12345.......'),
 			discordHook: env('DISCORD_HOOK', 'https://discord.com/api/webhooks/.....')
 		},
@@ -16,10 +16,10 @@ module.exports = {
 		},
 		csgoempire: [
 			{
-				userId: env('CSGOEMPIRE_USER_ID', 5884055), // Userid from your 'do_not_share_this_with_anyone_not_even_staff' cookie (first few number).
+				userId: env('CSGOEMPIRE_USER_ID', 12345), // Userid from your 'do_not_share_this_with_anyone_not_even_staff' cookie (first few number).
 				origin: env('CSGOEMPIRE_ORIGIN', 'csgoempire.com'), // The site you using for trading.
-				csgoempireApiKey: env('CSGOEMPIRE_API_KEY', '91c55d44674efd6ff49c643a4635af9b'), // https://csgoempire.com/trading/apikey
-				csgotrader: env('CSGOTRADER', true), // set true if you using Gery's chrome extension, to autosend the offers
+				csgoempireApiKey: env('CSGOEMPIRE_API_KEY', '12345678923456789234567'), // https://csgoempire.com/trading/apikey
+				csgotrader: env('CSGOTRADER', false), // set true if you using Gery's chrome extension, to autosend the offers
 				delistThreshold: env('DELIST_THRESHOLD', 5), // The percentage to delist the item if its drop in price.
 				steam: {
 					accountName: env('STEAM_ACCOUNT_NAME', false), // Your Steam username (not necessary), set false to disable steam

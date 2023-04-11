@@ -338,6 +338,7 @@ interface Deposit {
 	user_id: number;
 	bot_id?: any;
 	items: Item[];
+	item: Item;
 	total_value: number;
 	security_code: string;
 	tradeoffer_id: number;
