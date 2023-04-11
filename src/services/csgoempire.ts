@@ -16,6 +16,7 @@ export class CsgoempireService {
 	private _depositItems = {};
 	private _sockets = {};
 	private _trackers = {};
+	private _depositPollers = {};
 
 	public pricempire;
 
@@ -26,6 +27,7 @@ export class CsgoempireService {
 		(async () => {
 			for await (const config of this.helperService.config.settings.csgoempire) {
 				this.initSocket(config.userId);
+				this.initDepositPoller(config.userId);
 				await this.helperService.delay(5000);
 			}
 		})();
@@ -88,20 +90,58 @@ export class CsgoempireService {
 		} else if (config.csgotrader) {
 			const assetIds = [status.data.item.asset_id];
 			await this.helperService.sendMessage(
-				`Opening tradelink for ${itemName} - ${itemPrice} coins`,
+				`Opening tradelink for ${itemName} - ${itemPrice / 100} coins`,
 				"tradeStatusSending"
 			);
 			await open(
 				`${tradeURL}&csgotrader_send=your_id_730_2_${assetIds.toString()}`,
-				{ app: "chrome" }
+				{ app: config.browser || "chrome" }
 			);
 			this.initTracker(status, config, userId, itemName, itemPrice);
 		} else {
 			await this.helperService.sendMessage(
-				`Deposit offer for ${itemName} - ${itemPrice} coins, accepted, go send go go`,
+				`Deposit offer for ${itemName} - ${itemPrice / 100} coins, accepted, go send go go`,
 				"tradeStatusSending"
 			);
 		}
+	}
+	private initDepositPoller(userId) {
+		this.helperService.log(`Deposit Poller started for ${userId}`);
+		this._depositPollers[`poll_${userId}`] = setInterval(async () => {
+			this.helperService.log(`Polling for ${userId} stuck deposits`);
+			const responseData = await this.getActiveTrades(userId);
+			if(!responseData?.success){
+				return this.helperService.log(`Failed to get active trades for ${userId}`);
+			}
+			const tradesToBeSent = responseData?.data?.deposits?.filter(
+				(trade) => trade.status === 3 // 3 = sending
+			);
+			this.helperService.log(`Found ${tradesToBeSent.length} stuck deposits for ${userId}`);
+			const config = this.helperService.config.settings.csgoempire.find(
+				(config) => config.userId === userId
+			);
+
+			// send the trades
+			for await(const trade of tradesToBeSent){
+				const itemName = trade?.item.market_name;
+				if(!this._depositItems[`item_${trade.id}`]){
+					this._depositItems[`item_${trade.id}`] = trade?.total_value || trade?.item.market_value;
+				}
+
+				await this.send({
+					type: "deposit",
+					data: { // do some silly stupid formatting so we can just use the same function
+						...trade,
+						createdAt: new Date(trade.created_at),
+						updatedAt: new Date(trade.updated_at),
+						tradeoffer_id: String(trade.tradeoffer_id),
+						trade_id: String(trade.id)
+					},
+				}, config, userId, itemName, this._depositItems[`item_${trade.id}`]);
+			}
+
+			return this.helperService.log(`Deposit Poller finished for ${userId}`);
+		}, 5 * 60 * 1000); // 5 minutes
 	}
 	private initSocket(userId) {
 		const config = this.helperService.config.settings.csgoempire.find(
@@ -204,7 +244,7 @@ export class CsgoempireService {
 							this._depositItems[`item_${status.data.id}`] = status.data.total_value || status.data.item.market_value;
 
 							await this.helperService.sendMessage(
-								`Deposit '${itemName}' are confirming for ${this._depositItems[`item_${status.data.id}`] / 100} coins.`,
+								`Deposit '${itemName}' is confirming for ${this._depositItems[`item_${status.data.id}`] / 100} coins.`,
 								"tradeStatusProcessing"
 							);
 							break;
@@ -226,7 +266,7 @@ export class CsgoempireService {
 
 						case "TimedOut":
 							await this.helperService.sendMessage(
-								`Deposit offer for ${itemName} was not accepted by buyer.`,
+								`Deposit offer for ${itemName} was not accepted by the buyer.`,
 								"tradeStatusTimedOut"
 							);
 							break;
@@ -320,6 +360,27 @@ export class CsgoempireService {
 		} catch (e) {
 			await this.helperService.sendMessage(
 				`Bad response from ${config.origin} at 'confirmTrade', ${e.message}`,
+				"badResponse"
+			);
+		}
+	}
+	public async getActiveTrades(userId) {
+		const config = this.helperService.config.settings.csgoempire.find(
+			(config) => config.userId === userId
+		);
+		const options = await this.getRequestConfig(userId);
+		try {
+			return (
+				await axios.get(
+					`https://${config.origin}/api/v2/trading/user/trades`,
+					options
+				)
+			).data as GetActiveTradesResponse;
+		} catch (e) {
+			console.log(e?.response);
+
+			await this.helperService.sendMessage(
+				`Bad response from ${config.origin} at 'getActiveTrades', ${e.message}`,
 				"badResponse"
 			);
 		}

@@ -182,6 +182,14 @@ interface SecurityTokenResponse {
 	expires_in: number;
 }
 
+interface GetActiveTradesResponse {
+	success: boolean;
+	data: {
+		deposits: Deposit[],
+		withdrawals: any[]
+	}
+}
+
 interface AuctionUpdate {
 	app_id: number;
 	asset_id: string;
@@ -330,6 +338,7 @@ interface Deposit {
 	user_id: number;
 	bot_id?: any;
 	items: Item[];
+	item: Item;
 	total_value: number;
 	security_code: string;
 	tradeoffer_id: number;
