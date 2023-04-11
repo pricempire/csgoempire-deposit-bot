@@ -159,7 +159,7 @@ export class CsgoempireService {
 			},
 		});
 		this._sockets[`user_${userId}`].on("error", (err, v) => {
-			this.helperService.log(`error: ${err}`);
+			this.helperService.log(`Websocket Error: ${err}`);
 		});
 		this._sockets[`user_${userId}`].on("connect", async () => {
 			this._sockets[`user_${userId}`].emit('filters', { 'price_max': 10 }); // set it to 10 to reduce the socket bandwidth

@@ -38,6 +38,12 @@ interface Settings {
 interface Notifications {
 	steamLoginSuccess: boolean;
 	steamLoginFailed: boolean;
+	steamWebSession: boolean;
+	steamManagerSetCookiesFailed: boolean;
+	steamManagerSetCookiesSuccess: boolean;
+	steamClientError: boolean;
+	steamDisconnected: boolean;
+	steamAccountLimitations: boolean;
 	connectEmpire: boolean;
 	p2pItemUpdatedDelist: boolean;
 	p2pItemUpdatedPriceChanged: boolean;

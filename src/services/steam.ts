@@ -1,5 +1,6 @@
 import { HelperService } from "./helper";
 
+const SteamUser = require("steam-user");
 const SteamCommunity = require("steamcommunity");
 const TradeOfferManager = require("steam-tradeoffer-manager");
 const SteamTotp = require("steam-totp");
@@ -10,6 +11,7 @@ export class SteamService {
 	private retries = {};
 	private managers = {};
 	private steams = {};
+	private clients = {};
 	private helperService: HelperService;
 
 	constructor() {
@@ -21,12 +23,163 @@ export class SteamService {
 		for await (const config of this.helperService.config.settings.csgoempire) {
 
 			if (config.steam.accountName) {
-				await this.initLogin(config);
+				// await this.initLogin(config);
+				await this.initAccount(config);
 				await this.helperService.delay(10000);
 			}
 		}
 	}
-	async initLogin(config) {
+	// first stage of steam init
+	async initAccount(config){
+		try{
+			// setup steamuser
+			const steamOptions: {
+				httpProxy?: string;
+				autoRelogin?: boolean;
+			} = { autoRelogin: true };
+			if (config.steam.proxy) steamOptions.httpProxy = config.steam.proxy;
+			this.clients[config.steam.accountName] = new SteamUser(steamOptions);
+
+			// setup steamcommunity
+			const communityOptions: { request?: any } = {};
+			if (config.steam.proxy) communityOptions.request = Request.defaults({ 'proxy': config.steam.proxy });
+			this.steams[config.steam.accountName] = new SteamCommunity(communityOptions);
+
+			// setup tradeoffermanager
+			this.managers[config.steam.accountName] = new TradeOfferManager({
+				steam: this.clients[config.steam.accountName],
+				domain: "localhost",
+				language: "en",
+				pollInterval: 120000
+			});
+
+			// Steam Event Handlers
+			this.clients[config.steam.accountName].on(
+				"loggedOn",
+				() => {
+					this.helperService.sendMessage(
+						`Steam login success for ${config.steam.accountName}`,
+						"steamLoginSuccess"
+					);
+					this.clients[config.steam.accountName].setPersona(SteamUser.EPersonaState.Online);
+				}
+			);
+			// Event handler for steam web session
+			this.clients[config.steam.accountName].on(
+				"webSession",
+				(sessionId, cookies) => {
+					this.helperService.sendMessage(
+						`Steam got web session for ${config.steam.accountName}. Session ID: ${sessionId}`,
+						"steamWebSession"
+					);
+
+					this.steams[config.steam.accountName].setCookies(cookies);
+					this.managers[config.steam.accountName].setCookies(
+						cookies,
+						(err) => {
+							if (err) {
+								return this.helperService.sendMessage(
+									`Steam manager set cookies failed for ${config.steam.accountName}: ${err.message}`,
+									"steamManagerSetCookiesFailed"
+								);
+							}
+							this.helperService.sendMessage(
+								`Steam set cookies success for ${config.steam.accountName}`,
+								"steamManagerSetCookiesSuccess"
+							);
+						}
+					);
+				}
+			);
+			// Event handler for steam errors
+			this.clients[config.steam.accountName].on(
+				"error",
+				(err) => {
+					this.helperService.sendMessage(
+						`Steam client error for ${config.steam.accountName}: ${err.message}`,
+						"steamClientError"
+					);
+					this.steamLogin(config.steam);
+				}
+			);
+			// Event handler for steam disconnects
+			this.clients[config.steam.accountName].on(
+				"disconnected",
+				(eresult, msg) => {
+					this.helperService.sendMessage(
+						`Steam disconnected for ${config.steam.accountName} eresult=${eresult} msg=${msg} (should auto-reconnect)`,
+						"steamDisconnected"
+					);
+				}
+				);
+			// Event handler for steam account limitations
+			this.clients[config.steam.accountName].on(
+				"accountLimitations",
+				(limited, communityBanned, locked) => {
+					this.helperService.sendMessage(
+						`Steam account limitations for ${config.steam.accountName} limited=${limited} communityBanned=${communityBanned} locked=${locked}`,
+						"steamAccountLimitations"
+					);
+				}
+			);
+
+			// Steam community event handlers
+			this.steams[config.steam.accountName].on(
+				"sessionExpired",
+				(err) => {
+					this.helperService.sendMessage(
+						`Steam session expired for ${config.steam.accountName}, attempting to re-login: ${err.message}`,
+						"steamSessionExpired"
+					);
+					
+					// If we don't have a steam id at all, we need to re-login, otherwise we can just re-weblogin
+					if(!this.clients[config.steam.accountName].steamID){
+						this.steamLogin(config.steam);
+					} else{
+						this.clients[config.steam.accountName].webLogOn();
+					}
+				}
+			);
+
+			// Steam trade offer manager event handlers
+			if (config.steam.acceptOffers) {
+				// Accepts all offers empty from our side
+				this.managers[config.steam.accountName].on(
+					"newOffer",
+					(offer) => {
+						if (
+							offer.itemsToGive.length > 0 &&
+							!offer.isOurOffer
+						) {
+							// offer.decline();
+						} else {
+							offer.accept();
+						}
+					}
+				);
+			}
+
+			// login the steam-user instance
+			this.steamLogin(config.steam);
+		} catch(err){
+			this.helperService.sendMessage(
+				`Steam login failed for ${config.steam.accountName}: ${err.message}`,
+				"steamLoginFailed"
+			);
+
+			await this.helperService.delay(60000); // 60s because of steam guard
+			return await this.initAccount(config);
+		}
+	}
+	// login the steam-user instance
+	steamLogin(steam: Steam){
+		this.clients[steam.accountName].logOn({
+			accountName: steam.accountName,
+			password: steam.password,
+			twoFactorCode: SteamTotp.generateAuthCode(steam.sharedSecret),
+		});
+	}
+	/* async initLogin(config) {
 		try {
 			let initObject = {};
 			if (config.steam.proxy) {
@@ -113,7 +266,7 @@ export class SteamService {
 			await this.helperService.delay(60000); // 60s because of steam guard
 			return await this.initLogin(config);
 		}
-	}
+	} */
 	async steamGuardConfirmation(steam: Steam, offer: any) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -138,7 +291,7 @@ export class SteamService {
 				);
 			} catch (e) {
 				await this.helperService.delay(20000);
-				await this.login(steam);
+				// await this.login(steam);
 				return this.steamGuardConfirmation(steam, offer);
 			}
 		})
@@ -197,7 +350,7 @@ export class SteamService {
 		} catch (e) { }
 
 	}
-	async login(steam: Steam) {
+	/* async login(steam: Steam) {
 		return new Promise((resolve, reject) => {
 			this.steams[steam.accountName].login(
 				{
@@ -213,5 +366,5 @@ export class SteamService {
 				}
 			);
 		});
-	}
+	} */
 }
