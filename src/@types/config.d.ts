@@ -17,6 +17,7 @@ interface Csgoempire {
 	origin: string;
 	delistThreshold: number;
 	csgoempireApiKey: string;
+	stuckTradesPollRate: number;
 }
 interface Steam {
 	accountName: string;
