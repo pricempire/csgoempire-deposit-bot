@@ -300,13 +300,14 @@ export class SteamService {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
-					if (!this.retries[offer.items[0].assetid]) {
-						this.retries[offer.items[0].assetid] = 1;
+					this.helperService.log(`[#${offer.id}] Failed to send trade: ${err.message}`, 2);
+					if (!this.retries[offer.itemsToGive[0].assetid]) {
+						this.retries[offer.itemsToGive[0].assetid] = 1;
 					}
-					this.retries[offer.items[0].assetid]++;
+					this.retries[offer.itemsToGive[0].assetid]++;
 
-					if (this.retries[offer.items[0].assetid] > this.maxRetry) {
-						this.helperService.log('The sending process was unsuccessful after 5 retries, Probably item id changed.', 2);
+					if (this.retries[offer.itemsToGive[0].assetid] > this.maxRetry) {
+						this.helperService.log(`[#${offer.id}] The sending process was unsuccessful after ${this.maxRetry} retries, Probably item id changed.`, 2);
 						reject();
 					}
 					this.helperService.log('The sending process was unsuccessful. Try again in 10 seconds.', 2);
