@@ -62,7 +62,6 @@ export class SteamService {
 						`Steam login success for ${config.steam.accountName}`,
 						"steamLoginSuccess"
 					);
-					this.clients[config.steam.accountName].setPersona(SteamUser.EPersonaState.Online);
 				}
 			);
 			// Event handler for steam web session
