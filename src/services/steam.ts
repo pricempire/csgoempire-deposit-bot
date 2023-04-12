@@ -4,7 +4,8 @@ const SteamUser = require("steam-user");
 const SteamCommunity = require("steamcommunity");
 const TradeOfferManager = require("steam-tradeoffer-manager");
 const SteamTotp = require("steam-totp");
-const Request = require('request');
+const Request = require("request");
+const retry = require("async-retry");
 
 export class SteamService {
 	private readonly maxRetry = 5;
@@ -267,7 +268,43 @@ export class SteamService {
 			return await this.initLogin(config);
 		}
 	} */
-	async steamGuardConfirmation(steam: Steam, offer: any) {
+	async steamGuardConfirmation(steam, offer) {
+		try {
+			await retry(async () => new Promise((resolve, reject) => {
+					this.steams[steam.accountName].acceptConfirmationForObject(
+						steam.identitySecret,
+						offer.id,
+						(err) => {
+							if (err) {
+								if (offer.isGlitched()) {
+									this.helperService.log(`[#${offer.id}] Offer is glitched. (Empty from both side)`, 2);
+								}
+								
+								return reject(err);
+							}
+
+							resolve(true);
+						}
+					);
+			}), {
+				retries: 10,
+				factor: 2, // exponential backoff
+				minTimeout: 10 * 1000,
+				maxTimeout: 30 * 1000,
+				onRetry: (err, attempt) => {
+					this.helperService.log(`[#${offer.id}] Retry #${attempt} failed to confirm the offer: ${err.message}`, 2);
+					this.helperService.log(`[#${offer.id}] Trying again in ${Math.round(Math.pow(2, attempt) / 1000)} seconds.`, 2);
+				}
+			});
+
+			return true;
+		} catch (err) {
+			this.helperService.log(`[#${offer.id}] Failed to confirm the offer: ${err.message}`, 2);
+
+			return false;
+		}
+	}
+	/* async steamGuardConfirmation(steam: Steam, offer: any) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				this.steams[steam.accountName].acceptConfirmationForObject(
@@ -295,18 +332,19 @@ export class SteamService {
 				return this.steamGuardConfirmation(steam, offer);
 			}
 		})
-	}
+	} */
 	async send(offer) {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
-					if (!this.retries[offer.items[0].assetid]) {
-						this.retries[offer.items[0].assetid] = 1;
+					this.helperService.log(`[#${offer.id}] Failed to send trade: ${err.message}`, 2);
+					if (!this.retries[offer.itemsToGive[0].assetid]) {
+						this.retries[offer.itemsToGive[0].assetid] = 1;
 					}
-					this.retries[offer.items[0].assetid]++;
+					this.retries[offer.itemsToGive[0].assetid]++;
 
-					if (this.retries[offer.items[0].assetid] > this.maxRetry) {
-						this.helperService.log('The sending process was unsuccessful after 5 retries, Probably item id changed.', 2);
+					if (this.retries[offer.itemsToGive[0].assetid] > this.maxRetry) {
+						this.helperService.log(`[#${offer.id}] The sending process was unsuccessful after ${this.maxRetry} retries, Probably item id changed.`, 2);
 						reject();
 					}
 					this.helperService.log('The sending process was unsuccessful. Try again in 10 seconds.', 2);
@@ -319,6 +357,60 @@ export class SteamService {
 		});
 	}
 	async sendOffer(sendItem, tradeURL: string, userId: number) {
+		const config = this.helperService.config.settings.csgoempire.find(
+			(config) => config.userId === userId
+		);
+		// create the trade offer
+		const offer = this.managers[config.steam.accountName].createOffer(tradeURL);
+		offer.addMyItems([{
+			assetid: sendItem.asset_id,
+			appid: 730,
+			contextid: "2"
+		}]);
+		try {
+			// we will try to send the offer maxRetry times before giving up
+			const status = await retry(async () => new Promise((resolve, reject) => {
+				offer.send((err, status) => {
+					if(err) return reject(err);
+					
+					return resolve(status);
+				});
+			}), {
+				retries: this.maxRetry,
+				factor: 1,
+				minTimeout: 10000,
+				maxTimeout: 10000,
+				onRetry: (err, attempt) => {
+					this.helperService.log(`[#${offer.id}] Retry #${attempt} failed to send trade: ${err.message}`, 2);
+					if (!this.retries[sendItem.asset_id]) {
+						this.retries[sendItem.asset_id] = 1;
+					}
+					this.retries[sendItem.asset_id]++;
+					if (this.retries[sendItem.asset_id] > this.maxRetry) {
+						this.helperService.log(`[#${offer.id}] The sending process was unsuccessful after ${this.maxRetry} retries, Probably item id changed.`, 2);
+						throw new Error(`[#${offer.id}] Failed to send trade after ${this.maxRetry} retries`);
+					}
+					this.helperService.log(`[#${offer.id}] Retry #${attempt} unsuccessful. Trying again in 10 seconds.`, 2);
+				}
+			});
+			
+			this.helperService.log(`[#${offer.id}] Offer Sent for ${sendItem.market_name}. Status: ${status}`, 1);
+			// if status is pending then we need to mobile confirm the trade
+			if(status === 'pending'){
+				await this.helperService.delay(1e4);
+
+				const confirmedTrade = await this.steamGuardConfirmation(
+					config.steam,
+					offer,
+				);
+				if(confirmedTrade) this.helperService.log(`[#${offer.id}] Offer Confirmed for ${sendItem.market_name}`, 1);
+			}
+		} catch (e) {
+			this.helperService.log(`[#${offer.id}] Failed to create the Steam offer. ${sendItem.market_name}#${sendItem.asset_id}`, 2);
+		}
+	}
+
+	/* async sendOffer(sendItem, tradeURL: string, userId: number) {
 		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
@@ -349,7 +441,7 @@ export class SteamService {
 			this.helperService.log(`[#${offer.id}] Offer Confirmed for ${sendItem.market_name}`, 1);
 		} catch (e) { }
 
-	}
+	} */
 	/* async login(steam: Steam) {
 		return new Promise((resolve, reject) => {
 			this.steams[steam.accountName].login(
