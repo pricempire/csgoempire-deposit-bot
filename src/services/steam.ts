@@ -69,7 +69,7 @@ export class SteamService {
 				"webSession",
 				(sessionId, cookies) => {
 					this.helperService.sendMessage(
-						`Steam got web session for ${config.steam.accountName}. Session ID: ${sessionId}`,
+						`Steam got web session for ${config.steam.accountName}.`,
 						"steamWebSession"
 					);
 
