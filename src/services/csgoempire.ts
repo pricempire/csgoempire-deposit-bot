@@ -106,21 +106,21 @@ export class CsgoempireService {
 		}
 	}
 	private initDepositPoller(userId) {
-		this.helperService.log(`Deposit Poller started for ${userId}`);
+		this.helperService.log(`Deposit Poller started for ${userId}`, 1);
 		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
 		);
 
 		this._depositPollers[`poll_${userId}`] = setInterval(async () => {
-			this.helperService.log(`Polling for ${userId} stuck deposits`);
+			this.helperService.log(`Polling for ${userId} stuck deposits`, 1);
 			const responseData = await this.getActiveTrades(userId);
 			if(!responseData?.success){
-				return this.helperService.log(`Failed to get active trades for ${userId}`);
+				return this.helperService.log(`Failed to get active trades for ${userId}`, 2);
 			}
 			const tradesToBeSent = responseData?.data?.deposits?.filter(
 				(trade) => trade.status === 3 // 3 = sending
 			);
-			this.helperService.log(`Found ${tradesToBeSent.length} stuck deposits for ${userId}`);
+			this.helperService.log(`Found ${tradesToBeSent.length} stuck deposits for ${userId}`, 1);
 
 			// send the trades
 			for await(const trade of tradesToBeSent){
@@ -141,7 +141,7 @@ export class CsgoempireService {
 				}, config, userId, itemName, this._depositItems[`item_${trade.id}`]);
 			}
 
-			return this.helperService.log(`Deposit Poller finished for ${userId}`);
+			return this.helperService.log(`Deposit Poller finished for ${userId}`, 1);
 		}, (config.stuckTradesPollRate || 5) * (60 * 1000)); // default is 5 minutes
 	}
 	private initSocket(userId) {
