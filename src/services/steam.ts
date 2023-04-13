@@ -366,9 +366,11 @@ export class SteamService {
 			appid: 730,
 			contextid: "2"
 		}]);
+		this.helperService.log(`[#${offer.id}] Created offer to ${tradeURL} with item ${sendItem.asset_id}...`, 1);
 		try {
 			// we will try to send the offer maxRetry times before giving up
 			const status = await retry(async () => new Promise((resolve, reject) => {
+				this.helperService.log(`[#${offer.id}] Attempting offer send...`, 1);
 				offer.send((err, status) => {
 					if(err) return reject(err);
 					
@@ -381,10 +383,7 @@ export class SteamService {
 				maxTimeout: 10000,
 				onRetry: (err, attempt) => {
 					this.helperService.log(`[#${offer.id}] Retry #${attempt} failed to send trade: ${err.message}`, 2);
-					if (!this.retries[sendItem.asset_id]) {
-						this.retries[sendItem.asset_id] = 1;
-					}
-					this.retries[sendItem.asset_id]++;
+					this.retries[sendItem.asset_id] = attempt;
 					if (this.retries[sendItem.asset_id] > this.maxRetry) {
 						this.helperService.log(`[#${offer.id}] The sending process was unsuccessful after ${this.maxRetry} retries, Probably item id changed.`, 2);
 						throw new Error(`[#${offer.id}] Failed to send trade after ${this.maxRetry} retries`);
