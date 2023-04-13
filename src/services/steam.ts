@@ -62,7 +62,6 @@ export class SteamService {
 						`Steam login success for ${config.steam.accountName}`,
 						"steamLoginSuccess"
 					);
-					this.clients[config.steam.accountName].setPersona(SteamUser.EPersonaState.Online);
 				}
 			);
 			// Event handler for steam web session
@@ -70,7 +69,7 @@ export class SteamService {
 				"webSession",
 				(sessionId, cookies) => {
 					this.helperService.sendMessage(
-						`Steam got web session for ${config.steam.accountName}. Session ID: ${sessionId}`,
+						`Steam got web session for ${config.steam.accountName}.`,
 						"steamWebSession"
 					);
 
@@ -333,7 +332,7 @@ export class SteamService {
 			}
 		})
 	} */
-	async send(offer) {
+	/* async send(offer) {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
@@ -355,7 +354,7 @@ export class SteamService {
 				}
 			});
 		});
-	}
+	} */
 	async sendOffer(sendItem, tradeURL: string, userId: number) {
 		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
@@ -367,9 +366,11 @@ export class SteamService {
 			appid: 730,
 			contextid: "2"
 		}]);
+		this.helperService.log(`[#${offer.id}] Created offer to ${tradeURL} with item ${sendItem.asset_id}...`, 1);
 		try {
 			// we will try to send the offer maxRetry times before giving up
 			const status = await retry(async () => new Promise((resolve, reject) => {
+				this.helperService.log(`[#${offer.id}] Attempting offer send...`, 1);
 				offer.send((err, status) => {
 					if(err) return reject(err);
 					
@@ -382,15 +383,12 @@ export class SteamService {
 				maxTimeout: 10000,
 				onRetry: (err, attempt) => {
 					this.helperService.log(`[#${offer.id}] Retry #${attempt} failed to send trade: ${err.message}`, 2);
-					if (!this.retries[sendItem.asset_id]) {
-						this.retries[sendItem.asset_id] = 1;
-					}
-					this.retries[sendItem.asset_id]++;
+					this.retries[sendItem.asset_id] = attempt;
 					if (this.retries[sendItem.asset_id] > this.maxRetry) {
 						this.helperService.log(`[#${offer.id}] The sending process was unsuccessful after ${this.maxRetry} retries, Probably item id changed.`, 2);
 						throw new Error(`[#${offer.id}] Failed to send trade after ${this.maxRetry} retries`);
 					}
-					this.helperService.log(`[#${offer.id}] Retry #${attempt} unsuccessful. Trying again in 10 seconds.`, 2);
+					this.helperService.log(`[#${offer.id}] Retry #${attempt} unsuccessful. Trying again in ${Math.round(Math.pow(2, attempt) / 1000)} seconds.`, 2);
 				}
 			});
 			
