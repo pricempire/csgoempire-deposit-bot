@@ -332,7 +332,7 @@ export class SteamService {
 			}
 		})
 	} */
-	async send(offer) {
+	/* async send(offer) {
 		return new Promise((resolve, reject) => {
 			offer.send(async (err, status) => {
 				if (err) {
@@ -354,7 +354,7 @@ export class SteamService {
 				}
 			});
 		});
-	}
+	} */
 	async sendOffer(sendItem, tradeURL: string, userId: number) {
 		const config = this.helperService.config.settings.csgoempire.find(
 			(config) => config.userId === userId
@@ -389,7 +389,7 @@ export class SteamService {
 						this.helperService.log(`[#${offer.id}] The sending process was unsuccessful after ${this.maxRetry} retries, Probably item id changed.`, 2);
 						throw new Error(`[#${offer.id}] Failed to send trade after ${this.maxRetry} retries`);
 					}
-					this.helperService.log(`[#${offer.id}] Retry #${attempt} unsuccessful. Trying again in 10 seconds.`, 2);
+					this.helperService.log(`[#${offer.id}] Retry #${attempt} unsuccessful. Trying again in ${Math.round(Math.pow(2, attempt) / 1000)} seconds.`, 2);
 				}
 			});
 			
