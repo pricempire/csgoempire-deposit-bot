@@ -21,8 +21,8 @@
 		"pushover-notifications": "^1.2.2",
 		"socket.io-client": "2.0.3",
 		"steam-totp": "^2.1.2",
-		"steam-tradeoffer-manager": "^2.10.5",
-		"steam-user": "^4.28.1",
+		"steam-tradeoffer-manager": "^2.10.6",
+		"steam-user": "^4.29.3",
 		"steamcommunity": "^3.45.2",
 		"ts-node": "^9.1.1"
 	},
