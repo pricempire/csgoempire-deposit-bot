@@ -1,4 +1,4 @@
-# CSGOempire Deposit bot
+# CSGOempire Deposit bot [not maintained]
 
 #### USE THIS CODE AT YOUR OWN RISK, I DON'T TAKE RESPONSIBILITY FOR STEAM TRADE BANS
 
